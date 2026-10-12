@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NutriVitality</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "on-primary-fixed": "#00210c",
+                    "surface-container": "#e6eeff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#006d36",
+                    "secondary": "#55615a",
+                    "on-tertiary-container": "#005d3f",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "on-primary-container": "#005e2d",
+                    "tertiary-container": "#4bdca1",
+                    "error": "#ba1a1a",
+                    "primary": "#006d36",
+                    "tertiary-fixed": "#6ffbbe",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary-fixed-variant": "#3e4943",
+                    "tertiary-fixed-dim": "#4edea3",
+                    "primary-container": "#4ade80",
+                    "surface-dim": "#d0dbed",
+                    "error-container": "#ffdad6",
+                    "primary-fixed-dim": "#4de082",
+                    "on-surface": "#121c2a",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary": "#006c49",
+                    "on-secondary-container": "#5b6760",
+                    "surface": "#f8f9ff",
+                    "on-surface-variant": "#3d4a3e",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#131e19",
+                    "outline": "#6d7b6d",
+                    "on-tertiary-fixed": "#002113",
+                    "surface-container-high": "#dee9fc",
+                    "secondary-container": "#d9e6dd",
+                    "outline-variant": "#bccabb",
+                    "primary-fixed": "#6dfe9c",
+                    "on-primary-fixed-variant": "#005227",
+                    "inverse-surface": "#27313f",
+                    "on-secondary": "#ffffff",
+                    "inverse-primary": "#4de082",
+                    "on-background": "#121c2a",
+                    "secondary-fixed-dim": "#bdcac1",
+                    "on-tertiary-fixed-variant": "#005236",
+                    "secondary-fixed": "#d9e6dd",
+                    "background": "#f8f9ff",
+                    "surface-variant": "#d9e3f6",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#d9e3f6"
+                },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "16px", "xl": "24px", "full": "9999px" },
+                spacing: { "xs": "4px", "xl": "32px", "gutter": "16px", "lg": "24px", "container-margin": "20px", "md": "16px", "sm": "8px", "base": "4px" },
+                fontFamily: {
+                    "body-lg": ["Inter"], "data-display": ["Inter"], "headline-md": ["Inter"],
+                    "label-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Inter"],
+                    "body-md": ["Inter"], "headline-lg-mobile": ["Inter"]
+                },
+                fontSize: {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "data-display": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.03em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        display: inline-block; line-height: 1; text-transform: none;
+        letter-spacing: normal; word-wrap: normal; white-space: nowrap; direction: ltr;
+    }
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; min-height: max(884px, 100dvh); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #bccabb; border-radius: 10px; }
+    .progress-ring-circle { transition: stroke-dashoffset 0.85s ease-in-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+    .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+    @media (max-width: 768px) { .bento-grid { grid-template-columns: 1fr; gap: 16px; } }
+
+    /* Page routing */
+    .page-section { display: none; }
+    .page-section.is-active { display: block; }
+
+    /* Nav active state */
+    .nav-link { color: #3d4a3e; }
+    .nav-link.is-active { background: #4ade80; color: #005e2d; border-radius: 9999px; }
+    .nav-link.is-active .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+    /* Simple fade for page switches */
+    .page-section.is-active { animation: fadein .25s ease; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container">
+
+<!-- Shared Top App Bar -->
+<header class="bg-surface dark:bg-surface-container-lowest sticky top-0 z-50 flex justify-between items-center px-gutter py-md w-full">
+<button class="flex items-center gap-sm hover:opacity-80 transition-opacity cursor-pointer" data-nav="dashboard">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed">calendar_today</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">NutriVitality</h1>
+</button>
+<button class="active:scale-95 transition-transform duration-150 cursor-pointer" data-nav="profile">
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" alt="User avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8G2sPQCcw3ZegMT_3j7uAfrp0mswIdxnfzTLC36djXhMisk7OoC4j-RwTN2JEuHeivuPNsEo7UsP3MOxCFxo5ychh21APVoaZsLiYb4a3RRqIF1bvZeM19Q5Sy2FvKpCRjihGibiPAA7wmRymVtD6Ca1-EFTK6s-ufhEFYdPp3-cy-xQy8FQ5_N3TejgMWJE7QDH_u6E_nLCIko67ey8WPBA_fBzMr9gfmQrQL-pwtqDz45Pa3-LJK4f7UlyaiLqyh8paMUsBDgg"/>
+</div>
+</button>
+</header>
+
+<main class="pb-32">
+
+<!-- ============ PAGE: DASHBOARD (Home) ============ -->
+<section class="page-section is-active" data-page="dashboard">
+  <div class="max-w-7xl mx-auto px-container-margin mt-lg space-y-lg">
+    <section class="flex flex-col gap-xs">
+      <p class="font-label-md text-label-md text-on-surface-variant">Tuesday, May 24</p>
+      <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg">Daily Summary</h2>
+    </section>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+      <div class="md:col-span-7 bg-surface-container-lowest rounded-lg border border-outline-variant p-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] flex flex-col md:flex-row items-center justify-around gap-lg overflow-hidden relative">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-tertiary-container/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+        <div class="relative w-48 h-48">
+          <svg class="w-full h-full">
+            <circle class="text-secondary-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+            <circle class="text-primary progress-ring-circle" data-ring cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="552.92" stroke-linecap="round" stroke-width="12"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="font-data-display text-data-display text-on-surface">1,200</span>
+            <span class="font-label-md text-label-md text-on-surface-variant">of 2,000 kcal</span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-md text-center md:text-left">
+          <div>
+            <p class="font-headline-md text-headline-md text-primary">Great progress!</p>
+            <p class="font-body-md text-body-md text-on-surface-variant">You've consumed 60% of your daily goal. Keep it up!</p>
+          </div>
+          <div class="flex items-center gap-sm justify-center md:justify-start">
+            <span class="material-symbols-outlined text-primary">local_fire_department</span>
+            <span class="font-label-md text-label-md">800 kcal remaining</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-5 bg-surface-container-lowest rounded-lg border border-outline-variant p-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] space-y-md">
+        <h3 class="font-headline-md text-headline-md">Macros</h3>
+        <div class="space-y-base">
+          <div class="flex justify-between items-center">
+            <span class="font-label-md text-label-md text-on-surface">Protein</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">85g / 150g</span>
+          </div>
+          <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+            <div class="h-full bg-primary w-[56%] rounded-full"></div>
+          </div>
+        </div>
+        <div class="space-y-base">
+          <div class="flex justify-between items-center">
+            <span class="font-label-md text-label-md text-on-surface">Carbs</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">140g / 250g</span>
+          </div>
+          <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+            <div class="h-full bg-tertiary-container w-[56%] rounded-full"></div>
+          </div>
+        </div>
+        <div class="space-y-base">
+          <div class="flex justify-between items-center">
+            <span class="font-label-md text-label-md text-on-surface">Fats</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant">42g / 65g</span>
+          </div>
+          <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
+            <div class="h-full bg-secondary w-[64%] rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="space-y-md">
+      <div class="flex justify-between items-center">
+        <h3 class="font-headline-md text-headline-md">Today's Meals</h3>
+        <button class="text-primary font-label-md text-label-md hover:underline" data-nav="insights">View History</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
+          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnLAtmCmaCUqcnLX0mvgBk_iZD2wyTOSfHkTvrYP9R6Iqn3OvgNzW-Ch_rDf37TpBgcC1TktfFtGURzLraLzgkbS0mhU-NgP6UBSwqEshwo0tu0jYmLBZqtYo-egyGg3UCDtVqWsxzA0i0u8h901kdYziksjjOcXZxbSBFMCk4pYJZkGFjwDq2F800BSunl6ROHoP7BwBy2SGjxkiOVpnOX2zPMrrMzgrr3r2NX_Kj_dxfRUQxFzoapfqONvHhsVEHi-wKYY2pHwA')"></div>
+          <div class="p-md flex justify-between items-start">
+            <div>
+              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Breakfast</p>
+              <h4 class="font-headline-md text-headline-md truncate">Blueberry Oat Bowl</h4>
+            </div>
+            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">420 kcal</span>
+          </div>
+        </div>
+        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
+          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuASiA1OLZGH75KaYjGtAWMa0riCIJfB3vNeGyEyh2UlId47UKMoayrPc2r4RpZwk_ZGjZmhDoe1gXQlavM_g9n0hjvX98_oRF2723vGQ_1SGh5NwsGBjJas-SO5neTt_2d_N2P28deX0xafemGOdVvZR6Er_tbyUQ33UjHVFZmk3hDpkFbBNhpa3K1Zn6vjw3ca8CVX4bLnbjQiLz_BMmQMVRY9NF3qvwn8QykQ4GjtXVcto9ldcYE0eOreK2tyqolETnieIkSoAtk')"></div>
+          <div class="p-md flex justify-between items-start">
+            <div>
+              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Lunch</p>
+              <h4 class="font-headline-md text-headline-md truncate">Grilled Kale Quinoa</h4>
+            </div>
+            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">580 kcal</span>
+          </div>
+        </div>
+        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
+          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrmyp7Nvrctb3jPCYoHccU6RvP4Wj41ml_iopTfj7ezfGMm6lZjrbAfHoXOLE2yjU67c30uCKoJME9dY33IOAw7_bJ4PKz821LbxWr03s9VL-3ppsC4rPKndChR3Fm5NqUMkDCbSuWE20F2MZpWNc8k0z8d03Qwy0bk70QnijgYWPdgrBUlo2n2Z9e03uCjYFIRQ41HRUnPJNQmUIIs7kiIq7cJFKmFdCTzkFTOiPVH3IH-K4TkvD5sD0fHjzqnWmyLkGYtYptlKc')"></div>
+          <div class="p-md flex justify-between items-start">
+            <div>
+              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Dinner</p>
+              <h4 class="font-headline-md text-headline-md truncate">Seared Salmon Set</h4>
+            </div>
+            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">650 kcal</span>
+          </div>
+        </div>
+        <button class="bg-surface-container-lowest rounded-lg border border-outline-variant border-dashed flex flex-col items-center justify-center min-h-[200px] p-md text-center hover:bg-surface-container-low transition-colors cursor-pointer group" data-nav="search">
+          <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary mb-sm group-active:scale-90 transition-transform">
+            <span class="material-symbols-outlined">add</span>
+          </div>
+          <p class="font-label-md text-label-md text-on-surface">Log Snacks</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Keep track of small bites</p>
+        </button>
+      </div>
+    </section>
+
+    <section class="bg-primary/5 rounded-lg border border-primary-container p-lg flex flex-col md:flex-row items-center gap-md">
+      <div class="bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">lightbulb</span>
+      </div>
+      <div>
+        <h4 class="font-headline-md text-headline-md text-primary">Pro Tip: Hydration</h4>
+        <p class="font-body-md text-body-md text-on-surface-variant">Drinking a glass of water before meals can help with digestion and portion control. You're currently 2 glasses short of your water goal!</p>
+      </div>
+      <button class="ml-auto bg-primary text-on-primary px-lg py-md rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md" data-water-log>
+        Log Water
+      </button>
+    </section>
+  </div>
+
+  <button class="fixed bottom-24 right-container-margin w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center z-40 hover:opacity-90 active:scale-90 transition-all" data-nav="search">
+    <span class="material-symbols-outlined text-[32px]">add</span>
+  </button>
+</section>
+
+<!-- ============ PAGE: SEARCH / LOG ============ -->
+<section class="page-section" data-page="search">
+  <div class="max-w-3xl mx-auto px-container-margin pt-sm">
+    <section class="mt-md mb-lg">
+      <div class="relative group">
+        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <span class="material-symbols-outlined text-on-surface-variant">search</span>
+        </div>
+        <input id="food-search-input" class="w-full h-14 pl-12 pr-14 bg-surface-container-lowest border-none rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] focus:ring-2 focus:ring-primary text-body-md placeholder:text-outline transition-all duration-200" placeholder="Search food, dish, or cuisine (e.g. Indian, Italian, Chinese...)" type="text"/>
+        <button class="absolute inset-y-0 right-4 flex items-center text-primary hover:opacity-70 active:scale-90 transition-all">
+          <span class="material-symbols-outlined">barcode_scanner</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="space-y-lg mb-xl">
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">Browse by Cuisine</h3>
+        <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2" id="cuisine-chips">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">Drinks &amp; Beverages</h3>
+        <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2" id="drink-chips">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">Frequent Foods</h3>
+        <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2">
+          <button class="quick-search-chip flex-none px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-80 transition-opacity" data-query="Greek Yogurt">Greek Yogurt</button>
+          <button class="quick-search-chip flex-none px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-80 transition-opacity" data-query="Black Coffee">Black Coffee</button>
+          <button class="quick-search-chip flex-none px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-80 transition-opacity" data-query="Almonds">Almonds (30g)</button>
+          <button class="quick-search-chip flex-none px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-80 transition-opacity" data-query="Avocado Toast">Avocado Toast</button>
+          <button class="quick-search-chip flex-none px-md py-sm bg-secondary-container text-on-secondary-container rounded-full font-label-md text-label-md hover:opacity-80 transition-opacity" data-query="Protein Shake">Protein Shake</button>
+        </div>
+      </div>
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">Recent Searches</h3>
+        <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2">
+          <button class="quick-search-chip flex-none flex items-center gap-xs px-md py-sm bg-surface-container-low border border-outline-variant text-on-surface-variant rounded-full font-label-sm text-label-sm hover:bg-surface-variant transition-colors" data-query="Quinoa">
+            <span class="material-symbols-outlined text-[16px]">history</span>Quinoa Bowl
+          </button>
+          <button class="quick-search-chip flex-none flex items-center gap-xs px-md py-sm bg-surface-container-low border border-outline-variant text-on-surface-variant rounded-full font-label-sm text-label-sm hover:bg-surface-variant transition-colors" data-query="Salmon">
+            <span class="material-symbols-outlined text-[16px]">history</span>Grilled Salmon
+          </button>
+          <button class="quick-search-chip flex-none flex items-center gap-xs px-md py-sm bg-surface-container-low border border-outline-variant text-on-surface-variant rounded-full font-label-sm text-label-sm hover:bg-surface-variant transition-colors" data-query="Sweet Potato">
+            <span class="material-symbols-outlined text-[16px]">history</span>Sweet Potato
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant overflow-hidden">
+      <div class="px-md py-sm border-b border-outline-variant bg-surface-bright flex justify-between items-center">
+        <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" id="results-heading">Search Results</span>
+        <span class="font-label-sm text-label-sm text-outline" id="results-count">0 matches found</span>
+      </div>
+      <div class="divide-y divide-surface-container-low" id="search-results-list">
+        <!-- populated by JS -->
+      </div>
+      <div class="p-lg text-center hidden" id="no-results-msg">
+        <p class="font-body-md text-body-md text-on-surface-variant">No dishes found. Try a different cuisine or search term.</p>
+      </div>
+      <button class="w-full py-md text-primary font-label-md text-label-md bg-surface hover:bg-surface-container transition-colors border-t border-outline-variant hidden" id="show-more-btn">
+        Show more results
+      </button>
+    </section>
+
+    <section class="mt-xl mb-xl p-lg rounded-xl bg-primary-container/10 border border-primary-container/30 flex items-center gap-lg">
+      <div class="flex-shrink-0 w-14 h-14 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container">
+        <span class="material-symbols-outlined text-[32px]">lightbulb</span>
+      </div>
+      <div>
+        <h4 class="font-headline-md text-body-lg text-on-primary-container mb-xs">Logging Tip</h4>
+        <p class="text-body-md text-on-surface-variant">Logging your meals as you eat them is 40% more accurate than trying to remember at the end of the day!</p>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- ============ PAGE: INSIGHTS / STATS ============ -->
+<section class="page-section" data-page="insights">
+  <div class="max-w-7xl mx-auto px-gutter py-lg">
+    <div class="mb-lg">
+      <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg mb-xs">Nutrition Insights</h2>
+      <p class="font-body-md text-on-surface-variant">Here is your nutritional performance for this week.</p>
+    </div>
+    <div class="bento-grid">
+      <section class="col-span-full lg:col-span-8 bg-surface-container-lowest p-lg rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant">
+        <div class="flex justify-between items-center mb-xl">
+          <h3 class="font-headline-md text-headline-md">Weekly Calorie Trend</h3>
+          <div class="flex items-center gap-sm bg-surface-variant px-sm py-xs rounded-lg">
+            <span class="font-label-sm text-label-sm text-on-surface-variant">Daily Avg: 2,140 kcal</span>
+          </div>
+        </div>
+        <div class="flex items-end justify-between h-48 gap-xs md:gap-md pt-4">
+          <div class="flex-1 flex flex-col items-center group">
+            <div class="w-full bg-primary-container rounded-t-lg transition-all duration-500 group-hover:bg-primary" style="height: 75%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Mon</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group">
+            <div class="w-full bg-primary-container rounded-t-lg transition-all duration-500 group-hover:bg-primary" style="height: 90%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Tue</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group">
+            <div class="w-full bg-primary-container rounded-t-lg transition-all duration-500 group-hover:bg-primary" style="height: 65%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Wed</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group">
+            <div class="w-full bg-primary-container rounded-t-lg transition-all duration-500 group-hover:bg-primary" style="height: 82%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Thu</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group">
+            <div class="w-full bg-primary rounded-t-lg transition-all duration-500" style="height: 100%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-primary font-bold">Fri</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group opacity-40">
+            <div class="w-full bg-outline-variant rounded-t-lg" style="height: 20%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Sat</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center group opacity-40">
+            <div class="w-full bg-outline-variant rounded-t-lg" style="height: 20%"></div>
+            <span class="mt-sm font-label-sm text-label-sm text-on-surface-variant">Sun</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="col-span-full lg:col-span-4 bg-primary text-on-primary p-lg rounded-xl shadow-[0px_4px_20px_rgba(0,109,54,0.15)] flex flex-col justify-between relative overflow-hidden">
+        <div class="z-10">
+          <h3 class="font-headline-md text-headline-md mb-xs">7-Day Streak</h3>
+          <p class="font-label-md text-label-md opacity-80">You're on fire! Keep it up.</p>
+        </div>
+        <div class="mt-lg z-10 flex items-center gap-md">
+          <div class="text-[48px] font-bold">7</div>
+          <div class="flex flex-col">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider">Perfect Days</span>
+            <div class="flex gap-1 mt-1">
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+              <div class="w-6 h-1.5 rounded-full bg-on-primary"></div>
+            </div>
+          </div>
+        </div>
+        <div class="absolute -right-8 -bottom-8 opacity-20 transform rotate-12">
+          <span class="material-symbols-outlined text-[140px]">workspace_premium</span>
+        </div>
+      </section>
+
+      <section class="col-span-full lg:col-span-5 bg-surface-container-lowest p-lg rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant">
+        <h3 class="font-headline-md text-headline-md mb-xl">Nutrient Balance</h3>
+        <div class="space-y-lg">
+          <div>
+            <div class="flex justify-between items-center mb-sm">
+              <span class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary">pill</span>Vitamins
+              </span>
+              <span class="font-label-md text-label-md text-primary">85%</span>
+            </div>
+            <div class="h-3 w-full bg-secondary-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" data-bar style="width: 85%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-sm">
+              <span class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary">science</span>Minerals
+              </span>
+              <span class="font-label-md text-label-md text-primary">62%</span>
+            </div>
+            <div class="h-3 w-full bg-secondary-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" data-bar style="width: 62%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-sm">
+              <span class="font-label-md text-label-md text-on-surface flex items-center gap-xs">
+                <span class="material-symbols-outlined text-primary">grass</span>Fiber
+              </span>
+              <span class="font-label-md text-label-md text-primary">94%</span>
+            </div>
+            <div class="h-3 w-full bg-secondary-container rounded-full overflow-hidden">
+              <div class="h-full bg-primary rounded-full" data-bar style="width: 94%"></div>
+            </div>
+          </div>
+          <div class="mt-xl pt-lg border-t border-outline-variant flex items-center justify-between">
+            <div class="flex items-center gap-md">
+              <div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-tertiary">water_drop</span>
+              </div>
+              <div>
+                <h4 class="font-label-md text-label-md">Hydration</h4>
+                <p class="text-label-sm text-on-surface-variant">2.4 / 3.0 Liters</p>
+              </div>
+            </div>
+            <div class="relative w-12 h-12">
+              <svg class="w-full h-full transform -rotate-90">
+                <circle class="text-secondary-container" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-width="4"></circle>
+                <circle class="text-primary" cx="24" cy="24" fill="transparent" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="25.1" stroke-width="4"></circle>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="col-span-full lg:col-span-7 bg-surface-container-lowest p-lg rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant">
+        <h3 class="font-headline-md text-headline-md mb-xl">Top Foods This Week</h3>
+        <div class="space-y-base overflow-y-auto max-h-[400px] custom-scrollbar pr-xs">
+          <div class="flex items-center justify-between p-md bg-surface hover:bg-surface-variant transition-colors rounded-xl border border-transparent hover:border-outline-variant cursor-pointer group">
+            <div class="flex items-center gap-md">
+              <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Fresh avocado" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXuWhz_L4zc6aXyqRcoSvev19PyGWIYThhSaWKxJrRv6wlzJlotGFCzDQEBgpoHd260GIOKa_CFrrSEyw_q2brpNB60JQ5VRLUfeyH8078zu1ZtbOB7S9uTVq5wYaSpRn8iY0BZgI1iqIEOwv1NzpqRPNvEqJjjcI120aDEk8vkfTVqHLNILRDoynKBi8EdQ-0oUXwIyr3WxiND9ACygYFFVtE6zCJKw19YLck3wWO2cnxTKGl3vgPBgO6CPIW9v0waWelAGFmZ6M"/>
+              </div>
+              <div>
+                <h4 class="font-label-md text-label-md text-on-surface">Fresh Avocado</h4>
+                <div class="flex gap-xs mt-1">
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Healthy Fat</span>
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Fiber</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-label-md text-label-md text-primary">5 entries</div>
+              <div class="text-label-sm text-on-surface-variant">800 kcal total</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-md bg-surface hover:bg-surface-variant transition-colors rounded-xl border border-transparent hover:border-outline-variant cursor-pointer group">
+            <div class="flex items-center gap-md">
+              <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Greek yogurt with blueberries" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMcXRpHCCSR3TjZKMLoDqMkkZdQ6FG3zT5euCKkmcmVh-U_oPFl_UXJrsunghJQFQf0zJbGLHo3qdNyAlm6BnCuGdzhTa7iscMJEn3WDmjQWqc3ETn84NfeWSU2Rc0Tk7wCh-SA0QAxCBeMfq57rgPn9bYFGalptjI8vH3KiTrOTncxKOQfqUrAQcccAi4U6EgTH4tLipN0A_LxBUt5YWXIKbXmi7beMXCKbVbJAX0CmMw1chujZ9SJU2GzFiZqTUlOFgspr3J6rg"/>
+              </div>
+              <div>
+                <h4 class="font-label-md text-label-md text-on-surface">Greek Yogurt</h4>
+                <div class="flex gap-xs mt-1">
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">High Protein</span>
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Probiotics</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-label-md text-label-md text-primary">4 entries</div>
+              <div class="text-label-sm text-on-surface-variant">640 kcal total</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-md bg-surface hover:bg-surface-variant transition-colors rounded-xl border border-transparent hover:border-outline-variant cursor-pointer group">
+            <div class="flex items-center gap-md">
+              <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Raw almonds" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVLn2BBS1XQoQZ0RfdNx81pIc-_lPxHxz2n4C9Zx3Z2BnNKn6fsCpf42eVHa8k-VxcNcVSqSCWBuIN4IFFBLcxTmrMXzWXoILo1apNbTgw2Ipqo2JygXznwZ3PyB2rGKxIu3aj6hKKcqmMTSrr9qQUHFmoqZg3rTAaDefrB-6W56uD4QvVlSYD6_KtP0nl8uEH3N0gBAnviND1mQKvy72nGRDqFazSsfOH_CDzd1QuSCuwrx268LiFcWZhmesxn0ZmbXuamM_Toi4"/>
+              </div>
+              <div>
+                <h4 class="font-label-md text-label-md text-on-surface">Raw Almonds</h4>
+                <div class="flex gap-xs mt-1">
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Vitamin E</span>
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Energy</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-label-md text-label-md text-primary">4 entries</div>
+              <div class="text-label-sm text-on-surface-variant">420 kcal total</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-md bg-surface hover:bg-surface-variant transition-colors rounded-xl border border-transparent hover:border-outline-variant cursor-pointer group">
+            <div class="flex items-center gap-md">
+              <div class="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Quinoa salad" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXdQZWp3G_ecaVguxh_ud95LY5iq146j9R48YNQYPX11xSdcED0o9s8kwuqoJ9AIS2dRqb-g5ai-YfFMP42ZvvFDTs-ROFe0IiDrIn6Fv9gA8vAYg98zTUTvY6-2LWT0xNGmomcAWC9tK08HhmofLZnJh2Rq3_yq0z9Un1S9oTbrFsEklChliv7d4nXPVKgrr5xghpYC1FKrlIuQx8Q__otkIkQSDfrFWR2nAyJ6C6cqvNx2rNvllzyLuE4uqS1zl8bDTAqH0ArbY"/>
+              </div>
+              <div>
+                <h4 class="font-label-md text-label-md text-on-surface">Quinoa Salad</h4>
+                <div class="flex gap-xs mt-1">
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Complex Carbs</span>
+                  <span class="px-xs py-[2px] bg-tertiary-container/30 text-on-tertiary-fixed-variant rounded font-label-sm text-[10px]">Vegan</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="font-label-md text-label-md text-primary">3 entries</div>
+              <div class="text-label-sm text-on-surface-variant">510 kcal total</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <button class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform duration-150 hover:opacity-90 z-40 md:hidden" data-nav="search">
+    <span class="material-symbols-outlined">add</span>
+  </button>
+</section>
+
+<!-- ============ PAGE: PROFILE ============ -->
+<section class="page-section" data-page="profile">
+  <div class="max-w-5xl mx-auto px-container-margin py-lg space-y-xl">
+    <section class="flex flex-col items-center md:items-start md:flex-row gap-lg">
+      <div class="relative">
+        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
+          <img class="w-full h-full object-cover" alt="Profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5NH3WlZ1Rl_Wj45g8HLQSmUxIz9Hdm7mr3xkmTvKqGBQ8lgpXYPs13Yq79JUaXRZTluoLIKyvwUbrH8fgJcMPY8v2vLMVcpWd9G1A8H8qUTQ2Wuh_TXU_hR98rTQZ1qIkq9SOwQUvi8JGbGCc7JUk_TiKop4djYVGi48yk2c4xY_18OCc5VhLcpqT74YE2beToooBKNvnHX2Y0njtVhTretcn4lWDsQTIJjpiFuMAWAFdJKAwfTjs4VqfdiBECoAy_P3ebjh6zuQ"/>
+        </div>
+        <button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-md hover:scale-105 active:scale-95 transition-transform">
+          <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">edit</span>
+        </button>
+      </div>
+      <div class="text-center md:text-left pt-2">
+        <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg">Sarah Jenkins</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">Premium Member since Jan 2024</p>
+        <div class="flex flex-wrap justify-center md:justify-start gap-sm mt-4">
+          <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">High Protein</span>
+          <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Intermittent Fasting</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-md">
+      <div class="flex justify-between items-end">
+        <h3 class="font-headline-md text-headline-md">My Health Goals</h3>
+        <button class="text-primary font-label-md text-label-md hover:underline">Edit All</button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+        <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="bg-primary-container/20 p-2 rounded-lg">
+              <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
+          </div>
+          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Daily Target</p>
+          <div class="flex items-baseline gap-2">
+            <span class="font-data-display text-data-display text-on-surface">2,150</span>
+            <span class="font-label-md text-label-md text-on-surface-variant">kcal</span>
+          </div>
+          <div class="mt-4 w-full bg-surface-container h-2 rounded-full overflow-hidden">
+            <div class="bg-primary w-3/4 h-full rounded-full"></div>
+          </div>
+        </div>
+        <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="bg-tertiary-container/20 p-2 rounded-lg">
+              <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">scale</span>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
+          </div>
+          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Target Weight</p>
+          <div class="flex items-baseline gap-2">
+            <span class="font-data-display text-data-display text-on-surface">64.5</span>
+            <span class="font-label-md text-label-md text-on-surface-variant">kg</span>
+          </div>
+          <p class="mt-4 font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+            <span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings: 'FILL' 1;">trending_down</span>1.2 kg to go
+          </p>
+        </div>
+        <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
+          <div class="flex justify-between items-start mb-4">
+            <div class="bg-secondary-container/20 p-2 rounded-lg">
+              <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">directions_run</span>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
+          </div>
+          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Activity Level</p>
+          <div class="flex items-baseline gap-2">
+            <span class="font-headline-md text-headline-md text-on-surface">Moderately Active</span>
+          </div>
+          <p class="mt-4 font-label-sm text-label-sm text-on-surface-variant">4-5 workouts per week</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="space-y-md">
+      <h3 class="font-headline-md text-headline-md">Settings &amp; Privacy</h3>
+      <div class="bg-white rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant divide-y divide-surface-variant">
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">notifications</span>
+            <div>
+              <p class="font-body-md text-body-md text-on-surface">Notifications</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">Reminders, updates, and goals alerts</p>
+            </div>
+          </div>
+          <button id="notif-toggle" class="w-12 h-6 bg-primary rounded-full relative flex items-center px-1" aria-pressed="true" aria-label="Toggle notifications">
+            <div class="w-4 h-4 bg-white rounded-full translate-x-6 transition-transform"></div>
+          </button>
+        </div>
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">sync</span>
+            <div>
+              <p class="font-body-md text-body-md text-on-surface">Data Integration</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">Apple Health, Google Fit, MyFitnessPal</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+        </div>
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">lock</span>
+            <div>
+              <p class="font-body-md text-body-md text-on-surface">Privacy &amp; Security</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">Manage your data and account safety</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+        </div>
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+          <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">straighten</span>
+            <div>
+              <p class="font-body-md text-body-md text-on-surface">Units of Measurement</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant">Metric (kg, cm, kcal)</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="pt-8">
+      <button class="w-full md:w-auto px-lg py-md rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-colors flex items-center justify-center gap-2 active:scale-95 duration-150">
+        <span class="material-symbols-outlined">logout</span>Sign Out
+      </button>
+    </section>
+  </div>
+</section>
+
+</main>
+
+<!-- Shared Bottom Navigation -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-md py-sm bg-surface dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline shadow-sm">
+  <button class="nav-link flex flex-col items-center justify-center px-4 py-1 transition-colors active:scale-90 duration-100" data-nav="dashboard">
+    <span class="material-symbols-outlined">home</span>
+    <span class="font-label-sm text-label-sm">Home</span>
+  </button>
+  <button class="nav-link flex flex-col items-center justify-center px-4 py-1 transition-colors active:scale-90 duration-100" data-nav="search">
+    <span class="material-symbols-outlined">add_circle</span>
+    <span class="font-label-sm text-label-sm">Log</span>
+  </button>
+  <button class="nav-link flex flex-col items-center justify-center px-4 py-1 transition-colors active:scale-90 duration-100" data-nav="insights">
+    <span class="material-symbols-outlined">insights</span>
+    <span class="font-label-sm text-label-sm">Stats</span>
+  </button>
+  <button class="nav-link flex flex-col items-center justify-center px-4 py-1 transition-colors active:scale-90 duration-100" data-nav="profile">
+    <span class="material-symbols-outlined">person</span>
+    <span class="font-label-sm text-label-sm">Profile</span>
+  </button>
+</nav>
+
+<script>
+(function () {
+  var sections = document.querySelectorAll('.page-section');
+  var navLinks = document.querySelectorAll('[data-nav]');
+
+  function goTo(page) {
+    sections.forEach(function (s) {
+      s.classList.toggle('is-active', s.dataset.page === page);
+    });
+    navLinks.forEach(function (el) {
+      if (el.closest('nav')) {
+        el.classList.toggle('is-active', el.dataset.nav === page);
+      }
+    });
+    window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    if (page === 'dashboard') animateDashboard();
+  }
+
+  navLinks.forEach(function (el) {
+    el.addEventListener('click', function () {
+      goTo(el.dataset.nav);
+    });
+  });
+
+  // ---------- Food database (multi-cuisine) ----------
+  var FOODS = [
+    // Indian
+    { name: 'Butter Chicken', portion: '1 cup (250g)', kcal: 490, cuisine: 'Indian', icon: 'dinner_dining' },
+    { name: 'Chicken Tikka Masala', portion: '1 cup (250g)', kcal: 450, cuisine: 'Indian', icon: 'dinner_dining' },
+    { name: 'Palak Paneer', portion: '1 cup (200g)', kcal: 320, cuisine: 'Indian', icon: 'soup_kitchen' },
+    { name: 'Chana Masala', portion: '1 cup (200g)', kcal: 280, cuisine: 'Indian', icon: 'rice_bowl' },
+    { name: 'Plain Naan', portion: '1 piece (90g)', kcal: 260, cuisine: 'Indian', icon: 'bakery_dining' },
+    { name: 'Basmati Rice', portion: '1 cup cooked (160g)', kcal: 210, cuisine: 'Indian', icon: 'rice_bowl' },
+    { name: 'Vegetable Samosa', portion: '1 piece (50g)', kcal: 150, cuisine: 'Indian', icon: 'tapas' },
+    { name: 'Masala Dosa', portion: '1 piece (150g)', kcal: 380, cuisine: 'Indian', icon: 'lunch_dining' },
+    // Italian
+    { name: 'Spaghetti Carbonara', portion: '1 plate (300g)', kcal: 620, cuisine: 'Italian', icon: 'dinner_dining' },
+    { name: 'Margherita Pizza', portion: '1 slice (110g)', kcal: 285, cuisine: 'Italian', icon: 'local_pizza' },
+    { name: 'Chicken Parmesan', portion: '1 serving (280g)', kcal: 540, cuisine: 'Italian', icon: 'dinner_dining' },
+    { name: 'Caprese Salad', portion: '1 bowl (150g)', kcal: 220, cuisine: 'Italian', icon: 'nutrition' },
+    { name: 'Mushroom Risotto', portion: '1 cup (220g)', kcal: 380, cuisine: 'Italian', icon: 'rice_bowl' },
+    { name: 'Tiramisu', portion: '1 slice (100g)', kcal: 330, cuisine: 'Italian', icon: 'cake' },
+    // Greek
+    { name: 'Greek Salad', portion: '1 bowl (250g)', kcal: 230, cuisine: 'Greek', icon: 'nutrition' },
+    { name: 'Chicken Souvlaki', portion: '2 skewers (200g)', kcal: 340, cuisine: 'Greek', icon: 'kebab_dining' },
+    { name: 'Moussaka', portion: '1 serving (300g)', kcal: 450, cuisine: 'Greek', icon: 'dinner_dining' },
+    { name: 'Tzatziki', portion: '2 tbsp (30g)', kcal: 35, cuisine: 'Greek', icon: 'soup_kitchen' },
+    { name: 'Spanakopita', portion: '1 piece (100g)', kcal: 250, cuisine: 'Greek', icon: 'bakery_dining' },
+    // Chinese
+    { name: 'Kung Pao Chicken', portion: '1 cup (250g)', kcal: 420, cuisine: 'Chinese', icon: 'dinner_dining' },
+    { name: 'Egg Fried Rice', portion: '1 cup (200g)', kcal: 350, cuisine: 'Chinese', icon: 'rice_bowl' },
+    { name: 'Dim Sum Dumplings', portion: '4 pieces (120g)', kcal: 220, cuisine: 'Chinese', icon: 'tapas' },
+    { name: 'Mapo Tofu', portion: '1 cup (220g)', kcal: 300, cuisine: 'Chinese', icon: 'soup_kitchen' },
+    { name: 'Chow Mein', portion: '1 plate (250g)', kcal: 400, cuisine: 'Chinese', icon: 'ramen_dining' },
+    // Japanese
+    { name: 'Salmon Nigiri', portion: '4 pieces (120g)', kcal: 200, cuisine: 'Japanese', icon: 'set_meal' },
+    { name: 'Chicken Ramen', portion: '1 bowl (400g)', kcal: 480, cuisine: 'Japanese', icon: 'ramen_dining' },
+    { name: 'Miso Soup', portion: '1 cup (200g)', kcal: 60, cuisine: 'Japanese', icon: 'soup_kitchen' },
+    { name: 'Tempura Udon', portion: '1 bowl (350g)', kcal: 420, cuisine: 'Japanese', icon: 'ramen_dining' },
+    { name: 'California Roll', portion: '6 pieces (170g)', kcal: 260, cuisine: 'Japanese', icon: 'set_meal' },
+    // Mexican
+    { name: 'Chicken Burrito', portion: '1 wrap (300g)', kcal: 550, cuisine: 'Mexican', icon: 'lunch_dining' },
+    { name: 'Beef Tacos', portion: '3 pieces (200g)', kcal: 460, cuisine: 'Mexican', icon: 'lunch_dining' },
+    { name: 'Guacamole', portion: '2 tbsp (40g)', kcal: 90, cuisine: 'Mexican', icon: 'nutrition' },
+    { name: 'Enchiladas Verdes', portion: '2 pieces (250g)', kcal: 480, cuisine: 'Mexican', icon: 'dinner_dining' },
+    { name: 'Elote (Street Corn)', portion: '1 ear (150g)', kcal: 210, cuisine: 'Mexican', icon: 'nutrition' },
+    // Thai
+    { name: 'Pad Thai', portion: '1 plate (300g)', kcal: 480, cuisine: 'Thai', icon: 'ramen_dining' },
+    { name: 'Green Curry Chicken', portion: '1 cup (250g)', kcal: 400, cuisine: 'Thai', icon: 'soup_kitchen' },
+    { name: 'Tom Yum Soup', portion: '1 bowl (250g)', kcal: 180, cuisine: 'Thai', icon: 'soup_kitchen' },
+    { name: 'Mango Sticky Rice', portion: '1 serving (200g)', kcal: 320, cuisine: 'Thai', icon: 'rice_bowl' },
+    // Middle Eastern
+    { name: 'Chicken Shawarma', portion: '1 wrap (280g)', kcal: 480, cuisine: 'Middle Eastern', icon: 'kebab_dining' },
+    { name: 'Falafel', portion: '4 pieces (120g)', kcal: 330, cuisine: 'Middle Eastern', icon: 'tapas' },
+    { name: 'Hummus', portion: '3 tbsp (60g)', kcal: 110, cuisine: 'Middle Eastern', icon: 'nutrition' },
+    { name: 'Lamb Kofta', portion: '3 pieces (180g)', kcal: 350, cuisine: 'Middle Eastern', icon: 'kebab_dining' },
+    { name: 'Tabbouleh', portion: '1 cup (150g)', kcal: 140, cuisine: 'Middle Eastern', icon: 'nutrition' },
+    // Korean
+    { name: 'Bibimbap', portion: '1 bowl (350g)', kcal: 490, cuisine: 'Korean', icon: 'rice_bowl' },
+    { name: 'Korean Fried Chicken', portion: '4 pieces (200g)', kcal: 460, cuisine: 'Korean', icon: 'dinner_dining' },
+    { name: 'Kimchi', portion: '1/2 cup (75g)', kcal: 25, cuisine: 'Korean', icon: 'nutrition' },
+    { name: 'Bulgogi', portion: '1 cup (200g)', kcal: 380, cuisine: 'Korean', icon: 'dinner_dining' },
+    // French
+    { name: 'Croissant', portion: '1 piece (60g)', kcal: 230, cuisine: 'French', icon: 'bakery_dining' },
+    { name: 'Quiche Lorraine', portion: '1 slice (150g)', kcal: 380, cuisine: 'French', icon: 'dinner_dining' },
+    { name: 'Ratatouille', portion: '1 cup (220g)', kcal: 180, cuisine: 'French', icon: 'soup_kitchen' },
+    { name: 'Coq au Vin', portion: '1 serving (280g)', kcal: 460, cuisine: 'French', icon: 'dinner_dining' },
+    // Western
+    { name: 'Hard Boiled Egg', portion: '1 large (50g)', kcal: 78, cuisine: 'Western', icon: 'egg_alt' },
+    { name: 'Grilled Chicken Breast', portion: '100g, skinless', kcal: 165, cuisine: 'Western', icon: 'restaurant' },
+    { name: 'Hemp Seeds', portion: '1 tablespoon (10g)', kcal: 55, cuisine: 'Western', icon: 'nutrition' },
+    { name: 'Whole Grain Bread', portion: '1 slice (28g)', kcal: 69, cuisine: 'Western', icon: 'bakery_dining' },
+    { name: 'Oatmeal with Blueberries', portion: '1 bowl (240g)', kcal: 210, cuisine: 'Western', icon: 'fastfood' },
+    { name: 'Cheeseburger', portion: '1 burger (220g)', kcal: 550, cuisine: 'Western', icon: 'lunch_dining' },
+    { name: 'Caesar Salad', portion: '1 bowl (200g)', kcal: 320, cuisine: 'Western', icon: 'nutrition' },
+    { name: 'Mac and Cheese', portion: '1 cup (220g)', kcal: 380, cuisine: 'Western', icon: 'dinner_dining' },
+    { name: 'BBQ Ribs', portion: '3 ribs (250g)', kcal: 590, cuisine: 'Western', icon: 'dinner_dining' },
+    { name: 'Grilled Salmon', portion: '150g fillet', kcal: 280, cuisine: 'Western', icon: 'set_meal' },
+    // Soft Drinks
+    { name: 'Coca-Cola', portion: '1 can (355ml)', kcal: 140, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Diet Coke', portion: '1 can (355ml)', kcal: 1, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Sprite', portion: '1 can (355ml)', kcal: 140, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Ginger Ale', portion: '1 can (355ml)', kcal: 124, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Tonic Water', portion: '1 cup (240ml)', kcal: 83, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Orange Soda', portion: '1 can (355ml)', kcal: 179, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    { name: 'Sweetened Iced Tea', portion: '1 cup (240ml)', kcal: 90, cuisine: 'Soft Drinks', icon: 'local_cafe' },
+    { name: 'Root Beer', portion: '1 can (355ml)', kcal: 152, cuisine: 'Soft Drinks', icon: 'local_bar' },
+    // Hard Drinks
+    { name: 'Beer (Lager)', portion: '1 pint (473ml)', kcal: 208, cuisine: 'Hard Drinks', icon: 'sports_bar' },
+    { name: 'Whiskey', portion: '1 shot (44ml)', kcal: 97, cuisine: 'Hard Drinks', icon: 'liquor' },
+    { name: 'Vodka', portion: '1 shot (44ml)', kcal: 96, cuisine: 'Hard Drinks', icon: 'liquor' },
+    { name: 'Rum', portion: '1 shot (44ml)', kcal: 97, cuisine: 'Hard Drinks', icon: 'liquor' },
+    { name: 'Gin and Tonic', portion: '1 glass (240ml)', kcal: 175, cuisine: 'Hard Drinks', icon: 'local_bar' },
+    { name: 'Margarita', portion: '1 glass (240ml)', kcal: 280, cuisine: 'Hard Drinks', icon: 'local_bar' },
+    { name: 'Mojito', portion: '1 glass (240ml)', kcal: 168, cuisine: 'Hard Drinks', icon: 'local_bar' },
+    { name: 'Old Fashioned', portion: '1 glass (150ml)', kcal: 190, cuisine: 'Hard Drinks', icon: 'liquor' },
+    // Wine
+    { name: 'Red Wine (Cabernet)', portion: '1 glass (150ml)', kcal: 125, cuisine: 'Wine', icon: 'wine_bar' },
+    { name: 'White Wine (Chardonnay)', portion: '1 glass (150ml)', kcal: 120, cuisine: 'Wine', icon: 'wine_bar' },
+    { name: 'Rosé Wine', portion: '1 glass (150ml)', kcal: 118, cuisine: 'Wine', icon: 'wine_bar' },
+    { name: 'Prosecco', portion: '1 glass (120ml)', kcal: 90, cuisine: 'Wine', icon: 'wine_bar' },
+    { name: 'Champagne', portion: '1 glass (120ml)', kcal: 96, cuisine: 'Wine', icon: 'wine_bar' },
+    { name: 'Port Wine', portion: '1 glass (90ml)', kcal: 135, cuisine: 'Wine', icon: 'wine_bar' },
+    // Protein Shakes
+    { name: 'Whey Protein Shake', portion: '1 scoop (30g) + water', kcal: 120, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    { name: 'Chocolate Protein Shake', portion: '1 bottle (330ml)', kcal: 160, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    { name: 'Vanilla Protein Shake', portion: '1 bottle (330ml)', kcal: 150, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    { name: 'Plant-Based Protein Shake', portion: '1 scoop (30g) + water', kcal: 110, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    { name: 'Peanut Butter Protein Shake', portion: '1 bottle (400ml)', kcal: 280, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    { name: 'Mass Gainer Shake', portion: '1 scoop (150g) + milk', kcal: 600, cuisine: 'Protein Shakes', icon: 'fitness_center' },
+    // Smoothies
+    { name: 'Strawberry Banana Smoothie', portion: '1 cup (300ml)', kcal: 210, cuisine: 'Smoothies', icon: 'blender' },
+    { name: 'Mango Smoothie', portion: '1 cup (300ml)', kcal: 190, cuisine: 'Smoothies', icon: 'blender' },
+    { name: 'Green Detox Smoothie', portion: '1 cup (300ml)', kcal: 150, cuisine: 'Smoothies', icon: 'blender' },
+    { name: 'Berry Blast Smoothie', portion: '1 cup (300ml)', kcal: 200, cuisine: 'Smoothies', icon: 'blender' },
+    { name: 'Peanut Butter Banana Smoothie', portion: '1 cup (350ml)', kcal: 320, cuisine: 'Smoothies', icon: 'blender' },
+    { name: 'Piña Colada Smoothie (non-alcoholic)', portion: '1 cup (300ml)', kcal: 240, cuisine: 'Smoothies', icon: 'blender' }
+  ];
+
+  var CUISINES = ['All', 'Indian', 'Italian', 'Greek', 'Chinese', 'Japanese', 'Mexican', 'Thai', 'Middle Eastern', 'Korean', 'French', 'Western'];
+  var DRINK_CATEGORIES = ['Soft Drinks', 'Hard Drinks', 'Wine', 'Protein Shakes', 'Smoothies'];
+  var activeCuisine = 'All';
+  var visibleCount = 8;
+  var PAGE_SIZE = 8;
+
+  var cuisineChipsContainer = document.getElementById('cuisine-chips');
+  var drinkChipsContainer = document.getElementById('drink-chips');
+  var resultsList = document.getElementById('search-results-list');
+  var resultsCount = document.getElementById('results-count');
+  var noResultsMsg = document.getElementById('no-results-msg');
+  var showMoreBtn = document.getElementById('show-more-btn');
+  var searchInput = document.getElementById('food-search-input');
+
+  function chipClass(isActive) {
+    return 'cuisine-chip flex-none px-md py-sm rounded-full font-label-md text-label-md transition-colors ' +
+      (isActive ? 'bg-primary text-on-primary' : 'bg-secondary-container text-on-secondary-container hover:opacity-80');
+  }
+
+  function refreshChipStates() {
+    document.querySelectorAll('.cuisine-chip').forEach(function (el) {
+      el.className = chipClass(el.dataset.cuisine === activeCuisine);
+    });
+  }
+
+  function selectCategory(c) {
+    activeCuisine = c;
+    visibleCount = PAGE_SIZE;
+    refreshChipStates();
+    renderResults();
+  }
+
+  function buildChipRow(container, categories) {
+    categories.forEach(function (c) {
+      var chip = document.createElement('button');
+      chip.className = chipClass(c === activeCuisine);
+      chip.textContent = c;
+      chip.dataset.cuisine = c;
+      chip.addEventListener('click', function () { selectCategory(c); });
+      container.appendChild(chip);
+    });
+  }
+
+  buildChipRow(cuisineChipsContainer, CUISINES);
+  buildChipRow(drinkChipsContainer, DRINK_CATEGORIES);
+
+  function getFiltered() {
+    var q = (searchInput.value || '').trim().toLowerCase();
+    return FOODS.filter(function (f) {
+      var matchesCuisine = activeCuisine === 'All' || f.cuisine === activeCuisine;
+      var matchesQuery = !q || f.name.toLowerCase().indexOf(q) !== -1 || f.cuisine.toLowerCase().indexOf(q) !== -1;
+      return matchesCuisine && matchesQuery;
+    });
+  }
+
+  function foodRow(f) {
+    var row = document.createElement('div');
+    row.className = 'group flex items-center justify-between p-md hover:bg-surface-container-low transition-colors cursor-pointer';
+    row.innerHTML =
+      '<div class="flex items-center gap-md">' +
+        '<div class="w-12 h-12 rounded-lg bg-tertiary-container/20 flex items-center justify-center">' +
+          '<span class="material-symbols-outlined text-tertiary">' + f.icon + '</span>' +
+        '</div>' +
+        '<div>' +
+          '<p class="font-headline-md text-body-lg text-on-surface">' + f.name + '</p>' +
+          '<p class="font-label-sm text-label-sm text-on-surface-variant">' + f.portion + ' &middot; ' + f.cuisine + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-lg">' +
+        '<span class="font-data-display text-label-md text-primary">' + f.kcal + ' kcal</span>' +
+        '<button class="log-add-btn w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform shadow-md hover:opacity-90">' +
+          '<span class="material-symbols-outlined">add</span>' +
+        '</button>' +
+      '</div>';
+    return row;
+  }
+
+  function renderResults() {
+    var filtered = getFiltered();
+    resultsList.innerHTML = '';
+    filtered.slice(0, visibleCount).forEach(function (f) {
+      resultsList.appendChild(foodRow(f));
+    });
+    resultsCount.textContent = filtered.length + (filtered.length === 1 ? ' match found' : ' matches found');
+    noResultsMsg.classList.toggle('hidden', filtered.length !== 0);
+    resultsList.classList.toggle('hidden', filtered.length === 0);
+    showMoreBtn.classList.toggle('hidden', filtered.length <= visibleCount);
+  }
+
+  showMoreBtn.addEventListener('click', function () {
+    visibleCount += PAGE_SIZE;
+    renderResults();
+  });
+
+  searchInput.addEventListener('input', function () {
+    visibleCount = PAGE_SIZE;
+    renderResults();
+  });
+
+  document.querySelectorAll('.quick-search-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      searchInput.value = chip.dataset.query || '';
+      selectCategory('All');
+      searchInput.focus();
+    });
+  });
+
+  // Log-add micro-interaction (event delegation, since rows are re-rendered)
+  resultsList.addEventListener('click', function (e) {
+    var btn = e.target.closest('.log-add-btn');
+    if (!btn) return;
+    e.stopPropagation();
+    var icon = btn.querySelector('.material-symbols-outlined');
+    icon.textContent = 'check';
+    btn.classList.replace('bg-primary', 'bg-tertiary');
+    setTimeout(function () {
+      icon.textContent = 'add';
+      btn.classList.replace('bg-tertiary', 'bg-primary');
+    }, 2000);
+  });
+
+  renderResults();
+
+  // Water log micro-interaction (Dashboard)
+  var waterBtn = document.querySelector('[data-water-log]');
+  if (waterBtn) {
+    waterBtn.addEventListener('click', function () {
+      waterBtn.textContent = 'Logged!';
+      setTimeout(function () { waterBtn.textContent = 'Log Water'; }, 1800);
+    });
+  }
+
+  // Notification toggle (Profile)
+  var toggle = document.getElementById('notif-toggle');
+  if (toggle) {
+    var isOn = true;
+    toggle.addEventListener('click', function () {
+      isOn = !isOn;
+      var knob = toggle.querySelector('div');
+      toggle.setAttribute('aria-pressed', String(isOn));
+      if (isOn) {
+        toggle.classList.replace('bg-outline-variant', 'bg-primary');
+        knob.classList.replace('translate-x-1', 'translate-x-6');
+      } else {
+        toggle.classList.replace('bg-primary', 'bg-outline-variant');
+        knob.classList.replace('translate-x-6', 'translate-x-1');
+      }
+    });
+  }
+
+  // Progress bar reveal animation (Insights)
+  function animateInsightBars() {
+    document.querySelectorAll('#insights [data-bar]').forEach(function () {});
+    document.querySelectorAll('[data-page="insights"] [data-bar]').forEach(function (bar) {
+      var target = bar.style.width;
+      bar.style.width = '0%';
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          bar.style.transition = 'width 1s cubic-bezier(0.4,0,0.2,1)';
+          bar.style.width = target;
+        }, 50);
+      });
+    });
+  }
+
+  // Calorie ring animation (Dashboard)
+  function animateDashboard() {
+    var ring = document.querySelector('[data-ring]');
+    if (ring) {
+      ring.style.strokeDashoffset = '552.92';
+      requestAnimationFrame(function () {
+        setTimeout(function () { ring.style.strokeDashoffset = '221.16'; }, 50);
+      });
+    }
+  }
+
+  animateDashboard();
+  animateInsightBars();
+})();
+</script>
+</body>
+</html>
