@@ -110,19 +110,100 @@
     /* Simple fade for page switches */
     .page-section.is-active { animation: fadein .25s ease; }
     @keyframes fadein { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+    /* Auth mode: hide app chrome until signed in */
+    body.auth-mode #app-header, body.auth-mode #bottom-nav, body.auth-mode #fab-search-1, body.auth-mode #fab-search-2 { display: none !important; }
+    body:not(.auth-mode) [data-page="auth"] { display: none !important; }
+
+    .field-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #bccabb; background: #ffffff; font-family: 'Inter', sans-serif; font-size: 16px; outline: none; transition: border-color .15s, box-shadow .15s; }
+    .field-input:focus { border-color: #006d36; box-shadow: 0 0 0 3px rgba(0,109,54,0.12); }
+    .auth-tab { flex: 1; text-align: center; padding: 10px; border-radius: 9999px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all .15s; }
+    .auth-tab.is-active { background: #4ade80; color: #005e2d; }
+    .auth-tab:not(.is-active) { color: #55615a; }
+    .edit-toggle-hidden { display: none !important; }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-background text-on-surface font-body-md selection:bg-primary-container">
 
+<!-- ============ PAGE: AUTH (Login / Sign up) ============ -->
+<section class="page-section" data-page="auth">
+  <div class="min-h-[100dvh] w-full flex items-center justify-center px-container-margin py-xl bg-gradient-to-b from-primary/5 to-background">
+    <div class="w-full max-w-md">
+      <div class="flex flex-col items-center gap-sm mb-xl">
+        <span class="material-symbols-outlined text-primary text-[40px]">calendar_today</span>
+        <h1 class="font-headline-lg text-headline-lg text-primary text-center">NutriVitality</h1>
+        <p class="font-body-md text-on-surface-variant text-center">Track meals, hit your goals, feel great.</p>
+      </div>
+
+      <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-[0px_4px_20px_rgba(31,41,55,0.06)] p-lg">
+        <div class="flex gap-xs bg-secondary-container/40 rounded-full p-1 mb-lg">
+          <div class="auth-tab is-active" id="tab-login">Log In</div>
+          <div class="auth-tab" id="tab-signup">Sign Up</div>
+        </div>
+
+        <p id="auth-error" class="hidden mb-md text-error font-label-md text-label-md bg-error-container/30 px-md py-sm rounded-lg"></p>
+
+        <!-- LOGIN FORM -->
+        <form id="login-form" class="space-y-md">
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Email</label>
+            <input class="field-input" id="login-email" placeholder="you@example.com" required type="email"/>
+          </div>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Password</label>
+            <input class="field-input" id="login-password" placeholder="••••••••" required type="password"/>
+          </div>
+          <button class="w-full py-md rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md" type="submit">Log In</button>
+          <p class="text-center font-label-sm text-label-sm text-primary hover:underline cursor-pointer" id="forgot-password-link">Forgot your password?</p>
+        </form>
+
+        <!-- FORGOT PASSWORD FORM -->
+        <form id="reset-form" class="space-y-md hidden">
+          <p class="font-body-md text-body-md text-on-surface-variant">Enter your account email and we'll send you a link to reset your password.</p>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Email</label>
+            <input class="field-input" id="reset-email" placeholder="you@example.com" required type="email"/>
+          </div>
+          <p id="reset-status" class="hidden font-label-md text-label-md"></p>
+          <button class="w-full py-md rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md" type="submit">Send Reset Link</button>
+          <p class="text-center font-label-sm text-label-sm text-on-surface-variant hover:underline cursor-pointer" id="back-to-login-link">&larr; Back to Log In</p>
+        </form>
+
+        <!-- SIGNUP FORM -->
+        <form id="signup-form" class="space-y-md hidden">
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Full name</label>
+            <input class="field-input" id="signup-name" placeholder="Your full name" required type="text"/>
+          </div>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Email</label>
+            <input class="field-input" id="signup-email" placeholder="you@example.com" required type="email"/>
+          </div>
+          <div>
+            <label class="font-label-md text-label-md text-on-surface-variant block mb-1">Password</label>
+            <input class="field-input" id="signup-password" placeholder="At least 6 characters" required type="password"/>
+          </div>
+          <button class="w-full py-md rounded-xl bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md" type="submit">Create Account</button>
+        </form>
+
+        <p class="text-center font-label-sm text-label-sm text-on-surface-variant mt-lg">Your account is saved securely on this device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Shared Top App Bar -->
-<header class="bg-surface dark:bg-surface-container-lowest sticky top-0 z-50 flex justify-between items-center px-gutter py-md w-full">
+<header id="app-header" class="bg-surface dark:bg-surface-container-lowest sticky top-0 z-50 flex justify-between items-center px-gutter py-md w-full">
 <button class="flex items-center gap-sm hover:opacity-80 transition-opacity cursor-pointer" data-nav="dashboard">
 <span class="material-symbols-outlined text-primary dark:text-primary-fixed">calendar_today</span>
 <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">NutriVitality</h1>
 </button>
 <button class="active:scale-95 transition-transform duration-150 cursor-pointer" data-nav="profile">
 <div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-outline-variant">
-<img class="w-full h-full object-cover" alt="User avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8G2sPQCcw3ZegMT_3j7uAfrp0mswIdxnfzTLC36djXhMisk7OoC4j-RwTN2JEuHeivuPNsEo7UsP3MOxCFxo5ychh21APVoaZsLiYb4a3RRqIF1bvZeM19Q5Sy2FvKpCRjihGibiPAA7wmRymVtD6Ca1-EFTK6s-ufhEFYdPp3-cy-xQy8FQ5_N3TejgMWJE7QDH_u6E_nLCIko67ey8WPBA_fBzMr9gfmQrQL-pwtqDz45Pa3-LJK4f7UlyaiLqyh8paMUsBDgg"/>
+<img class="w-full h-full object-cover" alt="User avatar" id="header-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23d9e6dd'/%3E%3Ccircle cx='20' cy='16' r='7' fill='%2355615a'/%3E%3Cellipse cx='20' cy='36' rx='13' ry='10' fill='%2355615a'/%3E%3C/svg%3E"/>
 </div>
 </button>
 </header>
@@ -133,7 +214,7 @@
 <section class="page-section is-active" data-page="dashboard">
   <div class="max-w-7xl mx-auto px-container-margin mt-lg space-y-lg">
     <section class="flex flex-col gap-xs">
-      <p class="font-label-md text-label-md text-on-surface-variant">Tuesday, May 24</p>
+      <p class="font-label-md text-label-md text-on-surface-variant" id="dashboard-date">&nbsp;</p>
       <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg">Daily Summary</h2>
     </section>
 
@@ -146,49 +227,49 @@
             <circle class="text-primary progress-ring-circle" data-ring cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="552.92" stroke-linecap="round" stroke-width="12"></circle>
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="font-data-display text-data-display text-on-surface">1,200</span>
-            <span class="font-label-md text-label-md text-on-surface-variant">of 2,000 kcal</span>
+            <span class="font-data-display text-data-display text-on-surface" id="dash-kcal-consumed">0</span>
+            <span class="font-label-md text-label-md text-on-surface-variant" id="dash-kcal-goal">of 2,000 kcal</span>
           </div>
         </div>
         <div class="flex flex-col gap-md text-center md:text-left">
           <div>
-            <p class="font-headline-md text-headline-md text-primary">Great progress!</p>
-            <p class="font-body-md text-body-md text-on-surface-variant">You've consumed 60% of your daily goal. Keep it up!</p>
+            <p class="font-headline-md text-headline-md text-primary" id="dash-progress-title">Ready when you are</p>
+            <p class="font-body-md text-body-md text-on-surface-variant" id="dash-progress-desc">You haven't logged anything yet today. Tap the + button to add your first meal.</p>
           </div>
           <div class="flex items-center gap-sm justify-center md:justify-start">
             <span class="material-symbols-outlined text-primary">local_fire_department</span>
-            <span class="font-label-md text-label-md">800 kcal remaining</span>
+            <span class="font-label-md text-label-md" id="dash-kcal-remaining">2,000 kcal remaining</span>
           </div>
         </div>
       </div>
 
       <div class="md:col-span-5 bg-surface-container-lowest rounded-lg border border-outline-variant p-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] space-y-md">
-        <h3 class="font-headline-md text-headline-md">Macros</h3>
+        <h3 class="font-headline-md text-headline-md">Macros <span class="font-label-sm text-label-sm text-on-surface-variant normal-case">(estimated)</span></h3>
         <div class="space-y-base">
           <div class="flex justify-between items-center">
             <span class="font-label-md text-label-md text-on-surface">Protein</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant">85g / 150g</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant" id="dash-macro-protein-text">0g / 0g</span>
           </div>
           <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
-            <div class="h-full bg-primary w-[56%] rounded-full"></div>
+            <div class="h-full bg-primary rounded-full" id="dash-macro-protein-bar" style="width: 0%"></div>
           </div>
         </div>
         <div class="space-y-base">
           <div class="flex justify-between items-center">
             <span class="font-label-md text-label-md text-on-surface">Carbs</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant">140g / 250g</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant" id="dash-macro-carbs-text">0g / 0g</span>
           </div>
           <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
-            <div class="h-full bg-tertiary-container w-[56%] rounded-full"></div>
+            <div class="h-full bg-tertiary-container rounded-full" id="dash-macro-carbs-bar" style="width: 0%"></div>
           </div>
         </div>
         <div class="space-y-base">
           <div class="flex justify-between items-center">
             <span class="font-label-md text-label-md text-on-surface">Fats</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant">42g / 65g</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant" id="dash-macro-fats-text">0g / 0g</span>
           </div>
           <div class="w-full h-2 bg-secondary-container rounded-full overflow-hidden">
-            <div class="h-full bg-secondary w-[64%] rounded-full"></div>
+            <div class="h-full bg-secondary rounded-full" id="dash-macro-fats-bar" style="width: 0%"></div>
           </div>
         </div>
       </div>
@@ -199,57 +280,27 @@
         <h3 class="font-headline-md text-headline-md">Today's Meals</h3>
         <button class="text-primary font-label-md text-label-md hover:underline" data-nav="insights">View History</button>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
-        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
-          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAnLAtmCmaCUqcnLX0mvgBk_iZD2wyTOSfHkTvrYP9R6Iqn3OvgNzW-Ch_rDf37TpBgcC1TktfFtGURzLraLzgkbS0mhU-NgP6UBSwqEshwo0tu0jYmLBZqtYo-egyGg3UCDtVqWsxzA0i0u8h901kdYziksjjOcXZxbSBFMCk4pYJZkGFjwDq2F800BSunl6ROHoP7BwBy2SGjxkiOVpnOX2zPMrrMzgrr3r2NX_Kj_dxfRUQxFzoapfqONvHhsVEHi-wKYY2pHwA')"></div>
-          <div class="p-md flex justify-between items-start">
-            <div>
-              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Breakfast</p>
-              <h4 class="font-headline-md text-headline-md truncate">Blueberry Oat Bowl</h4>
-            </div>
-            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">420 kcal</span>
-          </div>
-        </div>
-        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
-          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuASiA1OLZGH75KaYjGtAWMa0riCIJfB3vNeGyEyh2UlId47UKMoayrPc2r4RpZwk_ZGjZmhDoe1gXQlavM_g9n0hjvX98_oRF2723vGQ_1SGh5NwsGBjJas-SO5neTt_2d_N2P28deX0xafemGOdVvZR6Er_tbyUQ33UjHVFZmk3hDpkFbBNhpa3K1Zn6vjw3ca8CVX4bLnbjQiLz_BMmQMVRY9NF3qvwn8QykQ4GjtXVcto9ldcYE0eOreK2tyqolETnieIkSoAtk')"></div>
-          <div class="p-md flex justify-between items-start">
-            <div>
-              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Lunch</p>
-              <h4 class="font-headline-md text-headline-md truncate">Grilled Kale Quinoa</h4>
-            </div>
-            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">580 kcal</span>
-          </div>
-        </div>
-        <div class="bg-surface-container-lowest rounded-lg border border-outline-variant overflow-hidden shadow-[0px_4px_20px_rgba(31,41,55,0.05)] hover:shadow-md transition-shadow">
-          <div class="h-32 w-full bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrmyp7Nvrctb3jPCYoHccU6RvP4Wj41ml_iopTfj7ezfGMm6lZjrbAfHoXOLE2yjU67c30uCKoJME9dY33IOAw7_bJ4PKz821LbxWr03s9VL-3ppsC4rPKndChR3Fm5NqUMkDCbSuWE20F2MZpWNc8k0z8d03Qwy0bk70QnijgYWPdgrBUlo2n2Z9e03uCjYFIRQ41HRUnPJNQmUIIs7kiIq7cJFKmFdCTzkFTOiPVH3IH-K4TkvD5sD0fHjzqnWmyLkGYtYptlKc')"></div>
-          <div class="p-md flex justify-between items-start">
-            <div>
-              <p class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Dinner</p>
-              <h4 class="font-headline-md text-headline-md truncate">Seared Salmon Set</h4>
-            </div>
-            <span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg">650 kcal</span>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md" id="dash-meals-grid">
         <button class="bg-surface-container-lowest rounded-lg border border-outline-variant border-dashed flex flex-col items-center justify-center min-h-[200px] p-md text-center hover:bg-surface-container-low transition-colors cursor-pointer group" data-nav="search">
           <div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary mb-sm group-active:scale-90 transition-transform">
             <span class="material-symbols-outlined">add</span>
           </div>
-          <p class="font-label-md text-label-md text-on-surface">Log Snacks</p>
-          <p class="font-label-sm text-label-sm text-on-surface-variant">Keep track of small bites</p>
+          <p class="font-label-md text-label-md text-on-surface">Log Food</p>
+          <p class="font-label-sm text-label-sm text-on-surface-variant">Search and add what you ate</p>
         </button>
       </div>
     </section>
 
     <section class="bg-primary/5 rounded-lg border border-primary-container p-lg flex flex-col md:flex-row items-center gap-md">
       <div class="bg-primary text-on-primary w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-        <span class="material-symbols-outlined">lightbulb</span>
+        <span class="material-symbols-outlined">water_drop</span>
       </div>
       <div>
-        <h4 class="font-headline-md text-headline-md text-primary">Pro Tip: Hydration</h4>
-        <p class="font-body-md text-body-md text-on-surface-variant">Drinking a glass of water before meals can help with digestion and portion control. You're currently 2 glasses short of your water goal!</p>
+        <h4 class="font-headline-md text-headline-md text-primary">Hydration</h4>
+        <p class="font-body-md text-body-md text-on-surface-variant" id="dash-water-desc">You haven't logged any water today. Each glass is 250ml.</p>
       </div>
       <button class="ml-auto bg-primary text-on-primary px-lg py-md rounded-lg font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md" data-water-log>
-        Log Water
+        Log Water (+250ml)
       </button>
     </section>
   </div>
@@ -284,6 +335,12 @@
       <div>
         <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">Drinks &amp; Beverages</h3>
         <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2" id="drink-chips">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div>
+        <h3 class="font-label-md text-label-md text-on-surface-variant px-1 mb-sm">More Categories</h3>
+        <div class="flex overflow-x-auto hide-scrollbar gap-sm pb-2" id="category-chips">
           <!-- populated by JS -->
         </div>
       </div>
@@ -327,6 +384,18 @@
       <button class="w-full py-md text-primary font-label-md text-label-md bg-surface hover:bg-surface-container transition-colors border-t border-outline-variant hidden" id="show-more-btn">
         Show more results
       </button>
+    </section>
+
+    <section class="mt-lg bg-surface-container-lowest rounded-xl shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant overflow-hidden hidden" id="api-results-section">
+      <div class="px-md py-sm border-b border-outline-variant bg-surface-bright flex justify-between items-center">
+        <span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">public</span>More from Open Food Facts
+        </span>
+        <span class="font-label-sm text-label-sm text-outline" id="api-results-status"></span>
+      </div>
+      <div class="divide-y divide-surface-container-low" id="api-results-list">
+        <!-- populated by JS from live API -->
+      </div>
     </section>
 
     <section class="mt-xl mb-xl p-lg rounded-xl bg-primary-container/10 border border-primary-container/30 flex items-center gap-lg">
@@ -559,19 +628,41 @@
   <div class="max-w-5xl mx-auto px-container-margin py-lg space-y-xl">
     <section class="flex flex-col items-center md:items-start md:flex-row gap-lg">
       <div class="relative">
-        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg">
-          <img class="w-full h-full object-cover" alt="Profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5NH3WlZ1Rl_Wj45g8HLQSmUxIz9Hdm7mr3xkmTvKqGBQ8lgpXYPs13Yq79JUaXRZTluoLIKyvwUbrH8fgJcMPY8v2vLMVcpWd9G1A8H8qUTQ2Wuh_TXU_hR98rTQZ1qIkq9SOwQUvi8JGbGCc7JUk_TiKop4djYVGi48yk2c4xY_18OCc5VhLcpqT74YE2beToooBKNvnHX2Y0njtVhTretcn4lWDsQTIJjpiFuMAWAFdJKAwfTjs4VqfdiBECoAy_P3ebjh6zuQ"/>
+        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-surface-container">
+          <img class="w-full h-full object-cover" alt="Profile photo" id="profile-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' fill='%23d9e6dd'/%3E%3Ccircle cx='64' cy='50' r='22' fill='%2355615a'/%3E%3Cellipse cx='64' cy='118' rx='42' ry='32' fill='%2355615a'/%3E%3C/svg%3E"/>
         </div>
-        <button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-md hover:scale-105 active:scale-95 transition-transform">
+        <button class="absolute bottom-0 right-0 bg-primary text-on-primary p-2 rounded-full shadow-md hover:scale-105 active:scale-95 transition-transform" id="avatar-edit-btn">
           <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">edit</span>
         </button>
+        <input accept="image/*" class="hidden" id="avatar-file-input" type="file"/>
       </div>
-      <div class="text-center md:text-left pt-2">
-        <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg">Sarah Jenkins</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">Premium Member since Jan 2024</p>
-        <div class="flex flex-wrap justify-center md:justify-start gap-sm mt-4">
-          <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">High Protein</span>
-          <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Intermittent Fasting</span>
+      <div class="text-center md:text-left pt-2 w-full max-w-sm">
+        <!-- Display mode -->
+        <div id="profile-display-mode">
+          <h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg" id="profile-name-display">Sarah Jenkins</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant" id="profile-bio-display">Premium Member since Jan 2024</p>
+          <div class="flex flex-wrap justify-center md:justify-start gap-sm mt-4" id="profile-tags-display">
+            <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">High Protein</span>
+            <span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Intermittent Fasting</span>
+          </div>
+          <button class="mt-4 text-primary font-label-md text-label-md hover:underline flex items-center gap-1 mx-auto md:mx-0" id="edit-profile-btn">
+            <span class="material-symbols-outlined text-base">edit</span>Edit Profile
+          </button>
+        </div>
+        <!-- Edit mode -->
+        <div class="hidden space-y-sm" id="profile-edit-mode">
+          <input class="field-input font-headline-md" id="profile-name-input" placeholder="Your name" type="text"/>
+          <input class="field-input" id="profile-bio-input" placeholder="A short bio or tagline" type="text"/>
+          <div class="flex flex-wrap gap-sm items-center" id="profile-tags-edit">
+            <!-- tag chips with remove buttons populated by JS -->
+          </div>
+          <div class="flex gap-sm">
+            <input class="field-input flex-1" id="profile-tag-input" placeholder="Add a tag and press Enter" type="text"/>
+          </div>
+          <div class="flex gap-sm pt-2">
+            <button class="flex-1 py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" id="save-profile-btn">Save</button>
+            <button class="flex-1 py-sm rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors" id="cancel-profile-btn">Cancel</button>
+          </div>
         </div>
       </div>
     </section>
@@ -579,7 +670,12 @@
     <section class="space-y-md">
       <div class="flex justify-between items-end">
         <h3 class="font-headline-md text-headline-md">My Health Goals</h3>
-        <button class="text-primary font-label-md text-label-md hover:underline">Edit All</button>
+        <div class="flex items-center gap-lg">
+          <button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1" id="calc-calories-btn">
+            <span class="material-symbols-outlined text-base">calculate</span>Calculate My Calories
+          </button>
+          <button class="text-primary font-label-md text-label-md hover:underline" id="edit-goals-btn">Edit All</button>
+        </div>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
         <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
@@ -587,13 +683,13 @@
             <div class="bg-primary-container/20 p-2 rounded-lg">
               <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">restaurant</span>
             </div>
-            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
           </div>
           <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Daily Target</p>
-          <div class="flex items-baseline gap-2">
-            <span class="font-data-display text-data-display text-on-surface">2,150</span>
+          <div class="flex items-baseline gap-2" id="goal-kcal-display">
+            <span class="font-data-display text-data-display text-on-surface" id="goal-kcal-value">2,150</span>
             <span class="font-label-md text-label-md text-on-surface-variant">kcal</span>
           </div>
+          <input class="field-input hidden mt-1" id="goal-kcal-input" max="8000" min="800" step="10" type="number"/>
           <div class="mt-4 w-full bg-surface-container h-2 rounded-full overflow-hidden">
             <div class="bg-primary w-3/4 h-full rounded-full"></div>
           </div>
@@ -603,30 +699,35 @@
             <div class="bg-tertiary-container/20 p-2 rounded-lg">
               <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">scale</span>
             </div>
-            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
           </div>
           <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Target Weight</p>
-          <div class="flex items-baseline gap-2">
-            <span class="font-data-display text-data-display text-on-surface">64.5</span>
+          <div class="flex items-baseline gap-2" id="goal-weight-display">
+            <span class="font-data-display text-data-display text-on-surface" id="goal-weight-value">64.5</span>
             <span class="font-label-md text-label-md text-on-surface-variant">kg</span>
           </div>
-          <p class="mt-4 font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
-            <span class="material-symbols-outlined text-primary text-xs" style="font-variation-settings: 'FILL' 1;">trending_down</span>1.2 kg to go
-          </p>
+          <input class="field-input hidden mt-1" id="goal-weight-input" min="20" step="0.1" type="number"/>
         </div>
         <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
           <div class="flex justify-between items-start mb-4">
             <div class="bg-secondary-container/20 p-2 rounded-lg">
               <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">directions_run</span>
             </div>
-            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer">more_vert</span>
           </div>
           <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Activity Level</p>
-          <div class="flex items-baseline gap-2">
-            <span class="font-headline-md text-headline-md text-on-surface">Moderately Active</span>
+          <div class="flex items-baseline gap-2" id="goal-activity-display">
+            <span class="font-headline-md text-headline-md text-on-surface" id="goal-activity-value">Moderately Active</span>
           </div>
-          <p class="mt-4 font-label-sm text-label-sm text-on-surface-variant">4-5 workouts per week</p>
+          <select class="field-input hidden mt-1" id="goal-activity-input">
+            <option value="Sedentary">Sedentary</option>
+            <option value="Lightly Active">Lightly Active</option>
+            <option value="Moderately Active">Moderately Active</option>
+            <option value="Very Active">Very Active</option>
+            <option value="Extremely Active">Extremely Active</option>
+          </select>
         </div>
+      </div>
+      <div class="hidden justify-end" id="goals-save-row">
+        <button class="px-lg py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" id="save-goals-btn">Save Goals</button>
       </div>
     </section>
 
@@ -645,7 +746,7 @@
             <div class="w-4 h-4 bg-white rounded-full translate-x-6 transition-transform"></div>
           </button>
         </div>
-        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group" id="data-integration-row">
           <div class="flex items-center gap-md">
             <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">sync</span>
             <div>
@@ -655,7 +756,7 @@
           </div>
           <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
         </div>
-        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group" id="privacy-security-row">
           <div class="flex items-center gap-md">
             <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">lock</span>
             <div>
@@ -665,12 +766,12 @@
           </div>
           <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
         </div>
-        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group">
+        <div class="flex items-center justify-between p-md hover:bg-surface transition-colors cursor-pointer group" id="units-row">
           <div class="flex items-center gap-md">
             <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">straighten</span>
             <div>
               <p class="font-body-md text-body-md text-on-surface">Units of Measurement</p>
-              <p class="font-label-sm text-label-sm text-on-surface-variant">Metric (kg, cm, kcal)</p>
+              <p class="font-label-sm text-label-sm text-on-surface-variant" id="units-desc">Metric (kg, cm, kcal)</p>
             </div>
           </div>
           <span class="material-symbols-outlined text-outline-variant">chevron_right</span>
@@ -679,7 +780,7 @@
     </section>
 
     <section class="pt-8">
-      <button class="w-full md:w-auto px-lg py-md rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-colors flex items-center justify-center gap-2 active:scale-95 duration-150">
+      <button class="w-full md:w-auto px-lg py-md rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-colors flex items-center justify-center gap-2 active:scale-95 duration-150" id="sign-out-btn">
         <span class="material-symbols-outlined">logout</span>Sign Out
       </button>
     </section>
@@ -689,7 +790,7 @@
 </main>
 
 <!-- Shared Bottom Navigation -->
-<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-md py-sm bg-surface dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline shadow-sm">
+<nav id="bottom-nav" class="fixed bottom-0 w-full z-50 flex justify-around items-center px-md py-sm bg-surface dark:bg-surface-container-lowest border-t border-outline-variant dark:border-outline shadow-sm">
   <button class="nav-link flex flex-col items-center justify-center px-4 py-1 transition-colors active:scale-90 duration-100" data-nav="dashboard">
     <span class="material-symbols-outlined">home</span>
     <span class="font-label-sm text-label-sm">Home</span>
@@ -708,6 +809,19 @@
   </button>
 </nav>
 
+<!-- Reusable modal (Settings & Privacy actions) -->
+<div class="fixed inset-0 z-[60] hidden items-center justify-center px-container-margin bg-black/40" id="app-modal-overlay">
+  <div class="bg-surface-container-lowest rounded-xl shadow-xl border border-outline-variant w-full max-w-md max-h-[85vh] overflow-y-auto custom-scrollbar">
+    <div class="flex items-center justify-between p-lg border-b border-outline-variant">
+      <h3 class="font-headline-md text-headline-md" id="app-modal-title">Title</h3>
+      <button class="text-on-surface-variant hover:text-on-surface" id="app-modal-close">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="p-lg" id="app-modal-body"><!-- populated by JS --></div>
+  </div>
+</div>
+
 <script>
 (function () {
   var sections = document.querySelectorAll('.page-section');
@@ -723,13 +837,667 @@
       }
     });
     window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
-    if (page === 'dashboard') animateDashboard();
+    if (page === 'dashboard') renderDashboard();
+    if (page === 'insights') animateInsightBars();
   }
 
   navLinks.forEach(function (el) {
     el.addEventListener('click', function () {
       goTo(el.dataset.nav);
     });
+  });
+
+  // ================= AUTH + PROFILE (Firebase Auth + Firestore) =================
+  var firebaseConfig = {
+    apiKey: "AIzaSyBUpOv5jaAlEvqd-ZDWnfrtdLsPTNOiQ60",
+    authDomain: "nutrivitality-ca2aa.firebaseapp.com",
+    projectId: "nutrivitality-ca2aa",
+    storageBucket: "nutrivitality-ca2aa.firebasestorage.app",
+    messagingSenderId: "262818539965",
+    appId: "1:262818539965:web:6fa1f9d9ad773f53d78ad4",
+    measurementId: "G-7DNBK9VJ4X"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db = firebase.firestore();
+
+  function defaultProfile(name) {
+    return {
+      name: name || 'New Member',
+      bio: 'Member since ' + new Date().toLocaleString('en-US', { month: 'short', year: 'numeric' }),
+      avatar: '',
+      tags: [],
+      dailyTarget: 2000,
+      targetWeight: 65,
+      activityLevel: 'Moderately Active',
+      unit: 'metric',
+      notifOn: true
+    };
+  }
+
+  // In-memory cache of the signed-in user's profile (kept in sync with Firestore)
+  var currentProfile = null;
+
+  function friendlyAuthError(err) {
+    var code = err && err.code;
+    if (code === 'auth/email-already-in-use') return 'An account with that email already exists.';
+    if (code === 'auth/invalid-email') return 'That email address looks invalid.';
+    if (code === 'auth/weak-password') return 'Password must be at least 6 characters.';
+    if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect email or password.';
+    if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait a moment and try again.';
+    if (code === 'auth/network-request-failed') return 'Network error \u2014 check your connection and try again.';
+    return (err && err.message) || 'Something went wrong. Please try again.';
+  }
+
+  // ---------- Auth screen ----------
+  var authError = document.getElementById('auth-error');
+  var tabLogin = document.getElementById('tab-login');
+  var tabSignup = document.getElementById('tab-signup');
+  var loginForm = document.getElementById('login-form');
+  var signupForm = document.getElementById('signup-form');
+
+  function showAuthError(msg) {
+    authError.textContent = msg;
+    authError.classList.remove('hidden');
+  }
+  function clearAuthError() { authError.classList.add('hidden'); authError.textContent = ''; }
+
+  function setFormsBusy(busy) {
+    [loginForm, signupForm].forEach(function (f) {
+      var btn = f.querySelector('button[type="submit"]');
+      btn.disabled = busy;
+      btn.style.opacity = busy ? '0.6' : '1';
+    });
+  }
+
+  var resetForm = document.getElementById('reset-form');
+
+  tabLogin.addEventListener('click', function () {
+    tabLogin.classList.add('is-active'); tabSignup.classList.remove('is-active');
+    loginForm.classList.remove('hidden'); signupForm.classList.add('hidden'); resetForm.classList.add('hidden');
+    clearAuthError();
+  });
+  tabSignup.addEventListener('click', function () {
+    tabSignup.classList.add('is-active'); tabLogin.classList.remove('is-active');
+    signupForm.classList.remove('hidden'); loginForm.classList.add('hidden'); resetForm.classList.add('hidden');
+    clearAuthError();
+  });
+
+  document.getElementById('forgot-password-link').addEventListener('click', function () {
+    document.getElementById('reset-email').value = document.getElementById('login-email').value;
+    loginForm.classList.add('hidden');
+    resetForm.classList.remove('hidden');
+    clearAuthError();
+  });
+  document.getElementById('back-to-login-link').addEventListener('click', function () {
+    resetForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    document.getElementById('reset-status').classList.add('hidden');
+  });
+  resetForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('reset-email').value.trim().toLowerCase();
+    var status = document.getElementById('reset-status');
+    var btn = resetForm.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.style.opacity = '0.6';
+    status.classList.remove('hidden');
+    status.className = 'font-label-md text-label-md text-on-surface-variant';
+    status.textContent = 'Sending\u2026';
+    auth.sendPasswordResetEmail(email)
+      .then(function () {
+        status.className = 'font-label-md text-label-md text-primary';
+        status.textContent = 'Reset link sent! Check your inbox (and spam folder) at ' + email + '.';
+      })
+      .catch(function (err) {
+        status.className = 'font-label-md text-label-md text-error';
+        status.textContent = friendlyAuthError(err);
+      })
+      .finally(function () { btn.disabled = false; btn.style.opacity = '1'; });
+  });
+
+  function showAuthScreen() {
+    document.body.classList.add('auth-mode');
+    sections.forEach(function (s) { s.classList.toggle('is-active', s.dataset.page === 'auth'); });
+    window.scrollTo({ top: 0 });
+  }
+
+  function enterApp() {
+    document.body.classList.remove('auth-mode');
+    applyProfileToUI();
+    renderDashboard();
+    goTo('dashboard');
+  }
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearAuthError();
+    var email = document.getElementById('login-email').value.trim().toLowerCase();
+    var password = document.getElementById('login-password').value;
+    setFormsBusy(true);
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(function (err) { showAuthError(friendlyAuthError(err)); })
+      .finally(function () { setFormsBusy(false); });
+  });
+
+  signupForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearAuthError();
+    var name = document.getElementById('signup-name').value.trim();
+    var email = document.getElementById('signup-email').value.trim().toLowerCase();
+    var password = document.getElementById('signup-password').value;
+    setFormsBusy(true);
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(function (cred) {
+        return cred.user.updateProfile({ displayName: name }).then(function () {
+          return db.collection('profiles').doc(cred.user.uid).set(defaultProfile(name));
+        });
+      })
+      .catch(function (err) { showAuthError(friendlyAuthError(err)); })
+      .finally(function () { setFormsBusy(false); });
+  });
+
+  document.getElementById('sign-out-btn').addEventListener('click', function () {
+    auth.signOut();
+    loginForm.reset(); signupForm.reset();
+  });
+
+  // ---------- Profile rendering ----------
+  var headerAvatar = document.getElementById('header-avatar');
+  var profileAvatar = document.getElementById('profile-avatar');
+  var avatarFileInput = document.getElementById('avatar-file-input');
+  var profileNameDisplay = document.getElementById('profile-name-display');
+  var profileBioDisplay = document.getElementById('profile-bio-display');
+  var profileTagsDisplay = document.getElementById('profile-tags-display');
+  var profileDisplayMode = document.getElementById('profile-display-mode');
+  var profileEditMode = document.getElementById('profile-edit-mode');
+  var profileNameInput = document.getElementById('profile-name-input');
+  var profileBioInput = document.getElementById('profile-bio-input');
+  var profileTagsEdit = document.getElementById('profile-tags-edit');
+  var profileTagInput = document.getElementById('profile-tag-input');
+  var editingTags = [];
+
+  function tagChipDisplay(t) {
+    return '<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">' + t + '</span>';
+  }
+  function tagChipEdit(t, idx) {
+    return '<span class="flex items-center gap-1 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm" data-tag-idx="' + idx + '">' +
+      t + '<button type="button" class="remove-tag-btn material-symbols-outlined text-[14px] hover:text-error" data-tag-idx="' + idx + '">close</button></span>';
+  }
+  function renderTagsEdit() {
+    profileTagsEdit.innerHTML = editingTags.map(function (t, i) { return tagChipEdit(t, i); }).join('');
+  }
+  profileTagsEdit.addEventListener('click', function (e) {
+    var btn = e.target.closest('.remove-tag-btn');
+    if (!btn) return;
+    var idx = parseInt(btn.dataset.tagIdx, 10);
+    editingTags.splice(idx, 1);
+    renderTagsEdit();
+  });
+  profileTagInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      var val = profileTagInput.value.trim();
+      if (val) { editingTags.push(val); profileTagInput.value = ''; renderTagsEdit(); }
+    }
+  });
+
+  var goalKcalValue = document.getElementById('goal-kcal-value');
+  var goalKcalInput = document.getElementById('goal-kcal-input');
+  var goalWeightValue = document.getElementById('goal-weight-value');
+  var goalWeightInput = document.getElementById('goal-weight-input');
+  var goalActivityValue = document.getElementById('goal-activity-value');
+  var goalActivityInput = document.getElementById('goal-activity-input');
+  var goalsSaveRow = document.getElementById('goals-save-row');
+  var unitsDesc = document.getElementById('units-desc');
+
+  // Writes a partial update to Firestore and updates the local cache immediately (optimistic UI)
+  function saveProfilePatch(patch) {
+    var user = auth.currentUser;
+    if (!user) return Promise.resolve();
+    currentProfile = Object.assign({}, currentProfile, patch);
+    return db.collection('profiles').doc(user.uid).set(patch, { merge: true });
+  }
+
+  function applyProfileToUI() {
+    var user = auth.currentUser;
+    if (!user || !currentProfile) return;
+    var p = currentProfile;
+    var avatarSrc = p.avatar || profileAvatar.src;
+    headerAvatar.src = avatarSrc;
+    profileAvatar.src = avatarSrc;
+    profileNameDisplay.textContent = p.name || user.displayName || 'Member';
+    profileBioDisplay.textContent = p.bio || '';
+    profileTagsDisplay.innerHTML = (p.tags || []).map(tagChipDisplay).join('');
+    goalKcalValue.textContent = Number(p.dailyTarget || 2000).toLocaleString();
+    goalKcalInput.value = p.dailyTarget || 2000;
+    goalWeightValue.textContent = p.targetWeight || 65;
+    goalWeightInput.value = p.targetWeight || 65;
+    goalActivityValue.textContent = p.activityLevel || 'Moderately Active';
+    goalActivityInput.value = p.activityLevel || 'Moderately Active';
+    unitsDesc.textContent = p.unit === 'imperial' ? 'Imperial (lb, ft, kcal)' : 'Metric (kg, cm, kcal)';
+  }
+
+  // ================= DAILY LOG (real, per-day, stored on the profile doc) =================
+  var GLASS_ML = 250;
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function getTodayLog() {
+    var logs = (currentProfile && currentProfile.logs) || {};
+    var day = logs[todayKey()];
+    return day ? { entries: day.entries || [], waterGlasses: day.waterGlasses || 0 } : { entries: [], waterGlasses: 0 };
+  }
+  function saveTodayLog(dayLog) {
+    var logs = Object.assign({}, (currentProfile && currentProfile.logs) || {});
+    logs[todayKey()] = dayLog;
+    return saveProfilePatch({ logs: logs });
+  }
+  function addLogEntry(food) {
+    var day = getTodayLog();
+    day.entries = day.entries.concat([{ name: food.name, kcal: food.kcal, portion: food.portion, cuisine: food.cuisine, icon: food.icon, loggedAt: Date.now() }]);
+    return saveTodayLog(day).then(renderDashboard);
+  }
+  function logWaterGlass() {
+    var day = getTodayLog();
+    day.waterGlasses = (day.waterGlasses || 0) + 1;
+    return saveTodayLog(day).then(renderDashboard);
+  }
+
+  var dashDateEl = document.getElementById('dashboard-date');
+  var dashKcalConsumed = document.getElementById('dash-kcal-consumed');
+  var dashKcalGoal = document.getElementById('dash-kcal-goal');
+  var dashProgressTitle = document.getElementById('dash-progress-title');
+  var dashProgressDesc = document.getElementById('dash-progress-desc');
+  var dashKcalRemaining = document.getElementById('dash-kcal-remaining');
+  var dashMealsGrid = document.getElementById('dash-meals-grid');
+  var dashWaterDesc = document.getElementById('dash-water-desc');
+  var RING_CIRCUMFERENCE = 552.92;
+
+  function mealCardHtml(entry) {
+    var time = new Date(entry.loggedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return '<div class="bg-surface-container-lowest rounded-lg border border-outline-variant p-md shadow-[0px_4px_20px_rgba(31,41,55,0.05)] flex flex-col justify-between min-h-[120px]">' +
+      '<div class="flex items-start justify-between gap-sm">' +
+        '<div class="w-10 h-10 rounded-lg bg-tertiary-container/20 flex items-center justify-center flex-shrink-0">' +
+          '<span class="material-symbols-outlined text-tertiary text-[20px]">' + (entry.icon || 'restaurant') + '</span>' +
+        '</div>' +
+        '<span class="font-label-md text-label-md bg-tertiary-container/20 text-on-tertiary-container px-sm py-xs rounded-lg whitespace-nowrap">' + entry.kcal + ' kcal</span>' +
+      '</div>' +
+      '<div class="mt-sm">' +
+        '<h4 class="font-headline-md text-body-lg truncate">' + entry.name + '</h4>' +
+        '<p class="font-label-sm text-label-sm text-on-surface-variant">' + entry.portion + ' &middot; ' + time + '</p>' +
+      '</div>' +
+    '</div>';
+  }
+
+  var addCardHtml = '<button class="bg-surface-container-lowest rounded-lg border border-outline-variant border-dashed flex flex-col items-center justify-center min-h-[120px] p-md text-center hover:bg-surface-container-low transition-colors cursor-pointer group" data-nav="search">' +
+    '<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary mb-sm group-active:scale-90 transition-transform">' +
+      '<span class="material-symbols-outlined">add</span>' +
+    '</div>' +
+    '<p class="font-label-md text-label-md text-on-surface">Log Food</p>' +
+    '<p class="font-label-sm text-label-sm text-on-surface-variant">Search and add what you ate</p>' +
+  '</button>';
+
+  function renderDashboard() {
+    if (!currentProfile) return;
+    dashDateEl.textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+    var day = getTodayLog();
+    var target = Number(currentProfile.dailyTarget) || 2000;
+    var consumed = day.entries.reduce(function (sum, e) { return sum + (Number(e.kcal) || 0); }, 0);
+    var remaining = Math.max(target - consumed, 0);
+    var pct = Math.min(consumed / target, 1);
+
+    dashKcalConsumed.textContent = consumed.toLocaleString();
+    dashKcalGoal.textContent = 'of ' + target.toLocaleString() + ' kcal';
+    dashKcalRemaining.textContent = remaining.toLocaleString() + ' kcal remaining';
+
+    if (day.entries.length === 0) {
+      dashProgressTitle.textContent = 'Ready when you are';
+      dashProgressDesc.textContent = 'You haven\u2019t logged anything yet today. Tap the + button to add your first meal.';
+    } else if (consumed < target) {
+      dashProgressTitle.textContent = 'Nice progress!';
+      dashProgressDesc.textContent = 'You\u2019ve logged ' + Math.round(pct * 100) + '% of your daily goal. Keep it up!';
+    } else {
+      dashProgressTitle.textContent = 'Goal reached';
+      dashProgressDesc.textContent = 'You\u2019ve hit your daily calorie target for today.';
+    }
+
+    var ring = document.querySelector('[data-ring]');
+    if (ring) {
+      var offset = RING_CIRCUMFERENCE * (1 - pct);
+      ring.style.strokeDashoffset = String(RING_CIRCUMFERENCE);
+      requestAnimationFrame(function () {
+        setTimeout(function () { ring.style.strokeDashoffset = String(offset); }, 50);
+      });
+    }
+
+    // Macros are estimated from a standard split (30% protein / 45% carbs / 25% fat by calories)
+    // since individual foods in the database don't carry a full macro breakdown.
+    function macroGrams(kcalPortion, calsPerGram) { return Math.round(kcalPortion / calsPerGram); }
+    var proteinGoal = macroGrams(target * 0.30, 4);
+    var carbsGoal = macroGrams(target * 0.45, 4);
+    var fatGoal = macroGrams(target * 0.25, 9);
+    var proteinHave = macroGrams(consumed * 0.30, 4);
+    var carbsHave = macroGrams(consumed * 0.45, 4);
+    var fatHave = macroGrams(consumed * 0.25, 9);
+    document.getElementById('dash-macro-protein-text').textContent = proteinHave + 'g / ' + proteinGoal + 'g';
+    document.getElementById('dash-macro-carbs-text').textContent = carbsHave + 'g / ' + carbsGoal + 'g';
+    document.getElementById('dash-macro-fats-text').textContent = fatHave + 'g / ' + fatGoal + 'g';
+    document.getElementById('dash-macro-protein-bar').style.width = Math.min(100, (proteinHave / proteinGoal) * 100) + '%';
+    document.getElementById('dash-macro-carbs-bar').style.width = Math.min(100, (carbsHave / carbsGoal) * 100) + '%';
+    document.getElementById('dash-macro-fats-bar').style.width = Math.min(100, (fatHave / fatGoal) * 100) + '%';
+
+    // Today's meals grid (most recent first) + the "add" card
+    var entriesHtml = day.entries.slice().reverse().map(mealCardHtml).join('');
+    dashMealsGrid.innerHTML = entriesHtml + addCardHtml;
+
+    // Water
+    var ml = day.waterGlasses * GLASS_ML;
+    if (day.waterGlasses === 0) {
+      dashWaterDesc.textContent = 'You haven\u2019t logged any water today. Each glass is ' + GLASS_ML + 'ml.';
+    } else {
+      dashWaterDesc.textContent = day.waterGlasses + ' glass' + (day.waterGlasses === 1 ? '' : 'es') + ' logged today (' + ml.toLocaleString() + 'ml \u2248 ' + (ml / 1000).toFixed(2) + 'L).';
+    }
+  }
+
+  // Resizes an uploaded image down to a small square thumbnail so it fits comfortably
+  // inside a Firestore document (1MB field limit) and loads fast.
+  function resizeImageToDataUrl(file, maxDim, callback) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.getElementById('avatar-edit-btn').addEventListener('click', function () {
+    avatarFileInput.click();
+  });
+  avatarFileInput.addEventListener('change', function () {
+    var file = avatarFileInput.files && avatarFileInput.files[0];
+    if (!file) return;
+    resizeImageToDataUrl(file, 300, function (dataUrl) {
+      headerAvatar.src = dataUrl;
+      profileAvatar.src = dataUrl;
+      saveProfilePatch({ avatar: dataUrl });
+    });
+  });
+
+  document.getElementById('edit-profile-btn').addEventListener('click', function () {
+    if (!currentProfile) return;
+    profileNameInput.value = currentProfile.name || '';
+    profileBioInput.value = currentProfile.bio || '';
+    editingTags = (currentProfile.tags || []).slice();
+    renderTagsEdit();
+    profileDisplayMode.classList.add('hidden');
+    profileEditMode.classList.remove('hidden');
+  });
+  document.getElementById('cancel-profile-btn').addEventListener('click', function () {
+    profileEditMode.classList.add('hidden');
+    profileDisplayMode.classList.remove('hidden');
+  });
+  document.getElementById('save-profile-btn').addEventListener('click', function () {
+    saveProfilePatch({
+      name: profileNameInput.value.trim() || (currentProfile && currentProfile.name) || 'Member',
+      bio: profileBioInput.value.trim(),
+      tags: editingTags.slice()
+    }).then(applyProfileToUI);
+    profileEditMode.classList.add('hidden');
+    profileDisplayMode.classList.remove('hidden');
+  });
+
+  document.getElementById('edit-goals-btn').addEventListener('click', function () {
+    [goalKcalValue, goalWeightValue, goalActivityValue].forEach(function (el) { el.parentElement.classList.add('hidden'); });
+    goalKcalInput.classList.remove('hidden');
+    goalWeightInput.classList.remove('hidden');
+    goalActivityInput.classList.remove('hidden');
+    goalsSaveRow.classList.remove('hidden');
+    goalsSaveRow.classList.add('flex');
+  });
+  document.getElementById('save-goals-btn').addEventListener('click', function () {
+    saveProfilePatch({
+      dailyTarget: parseInt(goalKcalInput.value, 10) || (currentProfile && currentProfile.dailyTarget) || 2000,
+      targetWeight: parseFloat(goalWeightInput.value) || (currentProfile && currentProfile.targetWeight) || 65,
+      activityLevel: goalActivityInput.value
+    }).then(applyProfileToUI);
+    [goalKcalValue, goalWeightValue, goalActivityValue].forEach(function (el) { el.parentElement.classList.remove('hidden'); });
+    goalKcalInput.classList.add('hidden');
+    goalWeightInput.classList.add('hidden');
+    goalActivityInput.classList.add('hidden');
+    goalsSaveRow.classList.add('hidden');
+    goalsSaveRow.classList.remove('flex');
+  });
+
+  document.getElementById('units-row').addEventListener('click', function () {
+    if (!currentProfile) return;
+    saveProfilePatch({ unit: currentProfile.unit === 'imperial' ? 'metric' : 'imperial' }).then(applyProfileToUI);
+  });
+
+  // ---------- Settings modals (Data Integration + Privacy & Security) ----------
+  var modalOverlay = document.getElementById('app-modal-overlay');
+  var modalTitle = document.getElementById('app-modal-title');
+  var modalBody = document.getElementById('app-modal-body');
+
+  function openModal(title, bodyHtml) {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = bodyHtml;
+    modalOverlay.classList.remove('hidden');
+    modalOverlay.classList.add('flex');
+  }
+  function closeModal() {
+    modalOverlay.classList.add('hidden');
+    modalOverlay.classList.remove('flex');
+  }
+  document.getElementById('app-modal-close').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function (e) { if (e.target === modalOverlay) closeModal(); });
+
+  // ---------- Calorie Calculator (Mifflin-St Jeor BMR + activity multiplier) ----------
+  var ACTIVITY_MULTIPLIERS = {
+    'Sedentary': 1.2,
+    'Lightly Active': 1.375,
+    'Moderately Active': 1.55,
+    'Very Active': 1.725,
+    'Extremely Active': 1.9
+  };
+
+  function calcCaloriesModalBody() {
+    var p = currentProfile || {};
+    return '' +
+      '<form id="calc-form" class="space-y-md">' +
+        '<div class="grid grid-cols-2 gap-md">' +
+          '<div>' +
+            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Sex</label>' +
+            '<select class="field-input" id="calc-sex"><option value="male">Male</option><option value="female">Female</option></select>' +
+          '</div>' +
+          '<div>' +
+            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Age</label>' +
+            '<input class="field-input" id="calc-age" min="10" max="100" placeholder="e.g. 22" type="number"/>' +
+          '</div>' +
+          '<div>' +
+            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Height (cm)</label>' +
+            '<input class="field-input" id="calc-height" min="100" max="250" placeholder="e.g. 172" type="number"/>' +
+          '</div>' +
+          '<div>' +
+            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Weight (kg)</label>' +
+            '<input class="field-input" id="calc-weight" min="30" max="300" step="0.1" placeholder="e.g. 65" value="' + (p.targetWeight || '') + '" type="number"/>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Activity Level</label>' +
+          '<select class="field-input" id="calc-activity">' +
+            Object.keys(ACTIVITY_MULTIPLIERS).map(function (lvl) {
+              return '<option value="' + lvl + '"' + (lvl === p.activityLevel ? ' selected' : '') + '>' + lvl + '</option>';
+            }).join('') +
+          '</select>' +
+        '</div>' +
+        '<button class="w-full py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" type="submit">Calculate</button>' +
+      '</form>' +
+      '<div id="calc-results" class="hidden mt-lg space-y-sm"></div>';
+  }
+
+  function calcResultCard(label, kcal, note, showSetBtn) {
+    return '<div class="flex items-center justify-between p-md rounded-lg border border-outline-variant">' +
+      '<div>' +
+        '<p class="font-body-md text-body-md text-on-surface">' + label + '</p>' +
+        '<p class="font-label-sm text-label-sm text-on-surface-variant">' + note + '</p>' +
+      '</div>' +
+      '<div class="text-right flex items-center gap-sm">' +
+        '<span class="font-headline-md text-headline-md text-primary">' + kcal.toLocaleString() + '</span>' +
+        (showSetBtn ? '<button class="calc-set-target-btn text-label-sm font-label-sm bg-primary text-on-primary px-sm py-xs rounded-lg hover:opacity-90" data-kcal="' + kcal + '">Use this</button>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  document.getElementById('calc-calories-btn').addEventListener('click', function () {
+    openModal('Calculate My Calories', calcCaloriesModalBody());
+
+    document.getElementById('calc-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var sex = document.getElementById('calc-sex').value;
+      var age = parseFloat(document.getElementById('calc-age').value);
+      var height = parseFloat(document.getElementById('calc-height').value);
+      var weight = parseFloat(document.getElementById('calc-weight').value);
+      var activity = document.getElementById('calc-activity').value;
+      var resultsEl = document.getElementById('calc-results');
+
+      if (!age || !height || !weight) {
+        resultsEl.classList.remove('hidden');
+        resultsEl.innerHTML = '<p class="font-label-md text-label-md text-error">Please fill in age, height, and weight.</p>';
+        return;
+      }
+
+      // Mifflin-St Jeor equation
+      var bmr = sex === 'male'
+        ? (10 * weight + 6.25 * height - 5 * age + 5)
+        : (10 * weight + 6.25 * height - 5 * age - 161);
+      var tdee = Math.round(bmr * ACTIVITY_MULTIPLIERS[activity]);
+      var mildLoss = Math.round(tdee - 250);
+      var loss = Math.round(tdee - 500);
+
+      resultsEl.classList.remove('hidden');
+      resultsEl.innerHTML =
+        '<p class="font-label-sm text-label-sm text-on-surface-variant mb-sm">Based on the Mifflin-St Jeor formula. These are estimates \u2014 individual needs vary.</p>' +
+        calcResultCard('Maintain current weight', tdee, 'Matches your estimated daily burn', true) +
+        calcResultCard('Mild weight loss', mildLoss, '\u2248 0.25 kg (0.5 lb) per week', true) +
+        calcResultCard('Weight loss', loss, '\u2248 0.5 kg (1 lb) per week', true) +
+        '<p class="font-label-sm text-label-sm text-on-surface-variant pt-sm">Never go below 1,200 kcal/day (women) or 1,500 kcal/day (men) without medical supervision.</p>';
+
+      resultsEl.querySelectorAll('.calc-set-target-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var kcal = parseInt(btn.dataset.kcal, 10);
+          saveProfilePatch({ dailyTarget: kcal }).then(function () {
+            applyProfileToUI();
+            renderDashboard();
+            closeModal();
+          });
+        });
+      });
+    });
+  });
+
+  document.getElementById('data-integration-row').addEventListener('click', function () {
+    openModal('Data Integration', '' +
+      '<p class="font-body-md text-body-md text-on-surface-variant mb-md">Connections to third-party health apps aren\u2019t available yet \u2014 they need each provider\u2019s own sign-in flow, which isn\u2019t wired up in this build.</p>' +
+      '<div class="space-y-sm">' +
+        ['Apple Health', 'Google Fit', 'MyFitnessPal'].map(function (name) {
+          return '<div class="flex items-center justify-between p-md rounded-lg border border-outline-variant opacity-60">' +
+            '<span class="font-body-md text-body-md">' + name + '</span>' +
+            '<span class="font-label-sm text-label-sm text-on-surface-variant">Not connected</span>' +
+          '</div>';
+        }).join('') +
+      '</div>');
+  });
+
+  document.getElementById('privacy-security-row').addEventListener('click', function () {
+    var user = auth.currentUser;
+    var email = (user && user.email) || '';
+    openModal('Privacy & Security', '' +
+      '<div class="space-y-lg">' +
+        '<div>' +
+          '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Signed in as</p>' +
+          '<p class="font-body-md text-body-md">' + email + '</p>' +
+        '</div>' +
+        '<form id="change-password-form" class="space-y-sm">' +
+          '<p class="font-label-md text-label-md">Change password</p>' +
+          '<input class="field-input" id="cp-current" placeholder="Current password" required type="password"/>' +
+          '<input class="field-input" id="cp-new" placeholder="New password (min 6 characters)" required type="password"/>' +
+          '<p id="cp-status" class="font-label-sm text-label-sm hidden"></p>' +
+          '<button class="w-full py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" type="submit">Update Password</button>' +
+        '</form>' +
+        '<div class="pt-md border-t border-outline-variant">' +
+          '<p class="font-label-md text-label-md text-error mb-sm">Delete account</p>' +
+          '<p class="font-label-sm text-label-sm text-on-surface-variant mb-sm">This permanently deletes your account and profile data. This can\u2019t be undone.</p>' +
+          '<button id="delete-account-btn" class="w-full py-sm rounded-lg border border-error text-error font-label-md text-label-md hover:bg-error-container/20 transition-colors">Delete My Account</button>' +
+        '</div>' +
+      '</div>');
+
+    document.getElementById('change-password-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var status = document.getElementById('cp-status');
+      status.classList.remove('hidden');
+      status.className = 'font-label-sm text-label-sm text-on-surface-variant';
+      status.textContent = 'Updating\u2026';
+      var currentPw = document.getElementById('cp-current').value;
+      var newPw = document.getElementById('cp-new').value;
+      if (newPw.length < 6) {
+        status.className = 'font-label-sm text-label-sm text-error';
+        status.textContent = 'New password must be at least 6 characters.';
+        return;
+      }
+      var cred = firebase.auth.EmailAuthProvider.credential(email, currentPw);
+      user.reauthenticateWithCredential(cred)
+        .then(function () { return user.updatePassword(newPw); })
+        .then(function () {
+          status.className = 'font-label-sm text-label-sm text-primary';
+          status.textContent = 'Password updated successfully.';
+          e.target.reset();
+        })
+        .catch(function (err) {
+          status.className = 'font-label-sm text-label-sm text-error';
+          status.textContent = friendlyAuthError(err);
+        });
+    });
+
+    document.getElementById('delete-account-btn').addEventListener('click', function () {
+      var pw = prompt('Please re-enter your password to confirm account deletion:');
+      if (!pw) return;
+      var cred = firebase.auth.EmailAuthProvider.credential(email, pw);
+      user.reauthenticateWithCredential(cred)
+        .then(function () { return db.collection('profiles').doc(user.uid).delete(); })
+        .then(function () { return user.delete(); })
+        .then(function () { closeModal(); })
+        .catch(function (err) { alert(friendlyAuthError(err)); });
+    });
+  });
+
+  // ---------- Boot: Firebase tells us if a session already exists (works across reloads) ----------
+  showAuthScreen(); // default state until Firebase responds
+  auth.onAuthStateChanged(function (user) {
+    if (user) {
+      db.collection('profiles').doc(user.uid).get().then(function (doc) {
+        currentProfile = doc.exists ? doc.data() : defaultProfile(user.displayName);
+        if (!doc.exists) db.collection('profiles').doc(user.uid).set(currentProfile);
+        enterApp();
+      }).catch(function () {
+        currentProfile = defaultProfile(user.displayName);
+        enterApp();
+      });
+    } else {
+      currentProfile = null;
+      showAuthScreen();
+    }
   });
 
   // ---------- Food database (multi-cuisine) ----------
@@ -844,17 +1612,207 @@
     { name: 'Green Detox Smoothie', portion: '1 cup (300ml)', kcal: 150, cuisine: 'Smoothies', icon: 'blender' },
     { name: 'Berry Blast Smoothie', portion: '1 cup (300ml)', kcal: 200, cuisine: 'Smoothies', icon: 'blender' },
     { name: 'Peanut Butter Banana Smoothie', portion: '1 cup (350ml)', kcal: 320, cuisine: 'Smoothies', icon: 'blender' },
-    { name: 'Piña Colada Smoothie (non-alcoholic)', portion: '1 cup (300ml)', kcal: 240, cuisine: 'Smoothies', icon: 'blender' }
+    { name: 'Piña Colada Smoothie (non-alcoholic)', portion: '1 cup (300ml)', kcal: 240, cuisine: 'Smoothies', icon: 'blender' },
+    // Vietnamese
+    { name: 'Pho Bo (Beef Noodle Soup)', portion: '1 bowl (450g)', kcal: 420, cuisine: 'Vietnamese', icon: 'ramen_dining' },
+    { name: 'Banh Mi', portion: '1 sandwich (250g)', kcal: 450, cuisine: 'Vietnamese', icon: 'lunch_dining' },
+    { name: 'Fresh Spring Rolls (Goi Cuon)', portion: '2 rolls (140g)', kcal: 140, cuisine: 'Vietnamese', icon: 'tapas' },
+    { name: 'Bun Cha', portion: '1 bowl (350g)', kcal: 480, cuisine: 'Vietnamese', icon: 'ramen_dining' },
+    { name: 'Vietnamese Iced Coffee', portion: '1 glass (240ml)', kcal: 140, cuisine: 'Vietnamese', icon: 'local_cafe' },
+    // Indonesian
+    { name: 'Nasi Goreng', portion: '1 plate (300g)', kcal: 520, cuisine: 'Indonesian', icon: 'rice_bowl' },
+    { name: 'Chicken Satay (Sate Ayam)', portion: '5 skewers (200g)', kcal: 380, cuisine: 'Indonesian', icon: 'kebab_dining' },
+    { name: 'Beef Rendang', portion: '1 cup (250g)', kcal: 460, cuisine: 'Indonesian', icon: 'dinner_dining' },
+    { name: 'Gado-Gado', portion: '1 bowl (280g)', kcal: 350, cuisine: 'Indonesian', icon: 'nutrition' },
+    // Filipino
+    { name: 'Chicken Adobo', portion: '1 cup (250g)', kcal: 430, cuisine: 'Filipino', icon: 'dinner_dining' },
+    { name: 'Sinigang na Baboy', portion: '1 bowl (350g)', kcal: 310, cuisine: 'Filipino', icon: 'soup_kitchen' },
+    { name: 'Lumpia (Spring Rolls)', portion: '4 pieces (140g)', kcal: 260, cuisine: 'Filipino', icon: 'tapas' },
+    { name: 'Pancit Canton', portion: '1 plate (280g)', kcal: 400, cuisine: 'Filipino', icon: 'ramen_dining' },
+    // Spanish
+    { name: 'Paella', portion: '1 plate (350g)', kcal: 520, cuisine: 'Spanish', icon: 'rice_bowl' },
+    { name: 'Tortilla Española', portion: '1 slice (150g)', kcal: 280, cuisine: 'Spanish', icon: 'egg_alt' },
+    { name: 'Patatas Bravas', portion: '1 cup (200g)', kcal: 340, cuisine: 'Spanish', icon: 'tapas' },
+    { name: 'Churros with Chocolate', portion: '4 pieces (120g)', kcal: 380, cuisine: 'Spanish', icon: 'bakery_dining' },
+    { name: 'Gazpacho', portion: '1 cup (250ml)', kcal: 90, cuisine: 'Spanish', icon: 'soup_kitchen' },
+    // African
+    { name: 'Jollof Rice', portion: '1 cup (250g)', kcal: 420, cuisine: 'African', icon: 'rice_bowl' },
+    { name: 'Injera with Doro Wat', portion: '1 serving (350g)', kcal: 480, cuisine: 'African', icon: 'dinner_dining' },
+    { name: 'Egusi Soup', portion: '1 bowl (300g)', kcal: 390, cuisine: 'African', icon: 'soup_kitchen' },
+    { name: 'Bobotie', portion: '1 serving (250g)', kcal: 410, cuisine: 'African', icon: 'dinner_dining' },
+    // Caribbean
+    { name: 'Jerk Chicken', portion: '1 serving (250g)', kcal: 400, cuisine: 'Caribbean', icon: 'dinner_dining' },
+    { name: 'Rice and Peas', portion: '1 cup (220g)', kcal: 330, cuisine: 'Caribbean', icon: 'rice_bowl' },
+    { name: 'Ackee and Saltfish', portion: '1 plate (280g)', kcal: 380, cuisine: 'Caribbean', icon: 'dinner_dining' },
+    { name: 'Beef Patty', portion: '1 piece (140g)', kcal: 340, cuisine: 'Caribbean', icon: 'lunch_dining' },
+    // Brazilian
+    { name: 'Feijoada', portion: '1 bowl (350g)', kcal: 520, cuisine: 'Brazilian', icon: 'soup_kitchen' },
+    { name: 'Pão de Queijo', portion: '3 pieces (90g)', kcal: 270, cuisine: 'Brazilian', icon: 'bakery_dining' },
+    { name: 'Coxinha', portion: '2 pieces (140g)', kcal: 360, cuisine: 'Brazilian', icon: 'tapas' },
+    { name: 'Brigadeiro', portion: '2 pieces (40g)', kcal: 180, cuisine: 'Brazilian', icon: 'cake' },
+    // German
+    { name: 'Bratwurst', portion: '1 sausage (100g)', kcal: 300, cuisine: 'German', icon: 'lunch_dining' },
+    { name: 'Soft Pretzel', portion: '1 piece (120g)', kcal: 340, cuisine: 'German', icon: 'bakery_dining' },
+    { name: 'Wiener Schnitzel', portion: '1 piece (200g)', kcal: 450, cuisine: 'German', icon: 'dinner_dining' },
+    { name: 'Sauerkraut', portion: '1 cup (150g)', kcal: 45, cuisine: 'German', icon: 'nutrition' },
+    // British
+    { name: 'Fish and Chips', portion: '1 serving (400g)', kcal: 850, cuisine: 'British', icon: 'set_meal' },
+    { name: 'Full English Breakfast', portion: '1 plate (450g)', kcal: 780, cuisine: 'British', icon: 'egg_alt' },
+    { name: 'Shepherd\u2019s Pie', portion: '1 cup (280g)', kcal: 400, cuisine: 'British', icon: 'dinner_dining' },
+    { name: 'Scone with Clotted Cream', portion: '1 piece (90g)', kcal: 320, cuisine: 'British', icon: 'bakery_dining' },
+    // Russian
+    { name: 'Borscht', portion: '1 bowl (300g)', kcal: 180, cuisine: 'Russian', icon: 'soup_kitchen' },
+    { name: 'Beef Stroganoff', portion: '1 cup (250g)', kcal: 460, cuisine: 'Russian', icon: 'dinner_dining' },
+    { name: 'Pelmeni', portion: '10 pieces (220g)', kcal: 420, cuisine: 'Russian', icon: 'tapas' },
+    // Ice Cream
+    { name: 'Vanilla Ice Cream', portion: '1 scoop (65g)', kcal: 137, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Chocolate Ice Cream', portion: '1 scoop (65g)', kcal: 143, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Strawberry Ice Cream', portion: '1 scoop (65g)', kcal: 127, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Mint Chocolate Chip', portion: '1 scoop (65g)', kcal: 150, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Cookies and Cream', portion: '1 scoop (65g)', kcal: 160, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Pistachio Gelato', portion: '1 scoop (65g)', kcal: 155, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Mango Sorbet', portion: '1 scoop (65g)', kcal: 100, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Butter Pecan', portion: '1 scoop (65g)', kcal: 165, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Rocky Road', portion: '1 scoop (65g)', kcal: 170, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Neapolitan Ice Cream', portion: '1 scoop (65g)', kcal: 140, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Soft Serve Cone', portion: '1 cone (120g)', kcal: 220, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Frozen Yogurt', portion: '1 cup (150g)', kcal: 160, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Ice Cream Sandwich', portion: '1 piece (75g)', kcal: 200, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Fruit Popsicle', portion: '1 bar (60g)', kcal: 60, cuisine: 'Ice Cream', icon: 'icecream' },
+    { name: 'Kulfi (Indian Ice Cream)', portion: '1 stick (70g)', kcal: 180, cuisine: 'Ice Cream', icon: 'icecream' },
+    // Desserts & Bakery
+    { name: 'Chocolate Cake', portion: '1 slice (100g)', kcal: 370, cuisine: 'Desserts', icon: 'cake' },
+    { name: 'New York Cheesecake', portion: '1 slice (110g)', kcal: 400, cuisine: 'Desserts', icon: 'cake' },
+    { name: 'Chocolate Brownie', portion: '1 piece (60g)', kcal: 260, cuisine: 'Desserts', icon: 'cake' },
+    { name: 'Apple Pie', portion: '1 slice (125g)', kcal: 300, cuisine: 'Desserts', icon: 'bakery_dining' },
+    { name: 'Glazed Donut', portion: '1 piece (60g)', kcal: 240, cuisine: 'Desserts', icon: 'bakery_dining' },
+    { name: 'Macaron', portion: '2 pieces (40g)', kcal: 180, cuisine: 'Desserts', icon: 'cake' },
+    { name: 'Cupcake with Frosting', portion: '1 piece (65g)', kcal: 260, cuisine: 'Desserts', icon: 'cake' },
+    { name: 'Cinnamon Roll', portion: '1 piece (90g)', kcal: 340, cuisine: 'Desserts', icon: 'bakery_dining' },
+    { name: 'Baklava', portion: '1 piece (50g)', kcal: 230, cuisine: 'Desserts', icon: 'bakery_dining' },
+    { name: 'Belgian Waffle', portion: '1 waffle (110g)', kcal: 310, cuisine: 'Desserts', icon: 'bakery_dining' },
+    // Fast Food
+    { name: 'Classic Cheeseburger', portion: '1 burger (220g)', kcal: 550, cuisine: 'Fast Food', icon: 'lunch_dining' },
+    { name: 'Double Beef Burger', portion: '1 burger (280g)', kcal: 720, cuisine: 'Fast Food', icon: 'lunch_dining' },
+    { name: 'French Fries', portion: 'medium (117g)', kcal: 365, cuisine: 'Fast Food', icon: 'fastfood' },
+    { name: 'Fried Chicken Bucket Piece', portion: '1 piece (140g)', kcal: 320, cuisine: 'Fast Food', icon: 'kebab_dining' },
+    { name: 'Chicken Nuggets', portion: '6 pieces (100g)', kcal: 280, cuisine: 'Fast Food', icon: 'fastfood' },
+    { name: 'Hot Dog', portion: '1 piece (100g)', kcal: 290, cuisine: 'Fast Food', icon: 'lunch_dining' },
+    { name: 'Onion Rings', portion: '8 pieces (100g)', kcal: 320, cuisine: 'Fast Food', icon: 'fastfood' },
+    { name: 'Pepperoni Pizza Slice', portion: '1 slice (120g)', kcal: 320, cuisine: 'Fast Food', icon: 'local_pizza' },
+    { name: 'Loaded Nachos', portion: '1 plate (250g)', kcal: 540, cuisine: 'Fast Food', icon: 'tapas' },
+    // Breakfast
+    { name: 'Scrambled Eggs', portion: '2 eggs (100g)', kcal: 180, cuisine: 'Breakfast', icon: 'egg_alt' },
+    { name: 'Crispy Bacon', portion: '3 strips (30g)', kcal: 130, cuisine: 'Breakfast', icon: 'lunch_dining' },
+    { name: 'Pancakes with Syrup', portion: '3 pancakes (150g)', kcal: 430, cuisine: 'Breakfast', icon: 'bakery_dining' },
+    { name: 'French Toast', portion: '2 slices (140g)', kcal: 350, cuisine: 'Breakfast', icon: 'bakery_dining' },
+    { name: 'Granola with Milk', portion: '1 cup (200g)', kcal: 320, cuisine: 'Breakfast', icon: 'fastfood' },
+    { name: 'Bagel with Cream Cheese', portion: '1 bagel (120g)', kcal: 350, cuisine: 'Breakfast', icon: 'bakery_dining' },
+    { name: 'Breakfast Burrito', portion: '1 wrap (250g)', kcal: 480, cuisine: 'Breakfast', icon: 'lunch_dining' },
+    { name: 'Blueberry Oat Bowl', portion: '1 bowl (280g)', kcal: 420, cuisine: 'Breakfast', icon: 'fastfood' },
+    // Fruits
+    { name: 'Apple', portion: '1 medium (180g)', kcal: 95, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Banana', portion: '1 medium (120g)', kcal: 105, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Orange', portion: '1 medium (130g)', kcal: 62, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Grapes', portion: '1 cup (150g)', kcal: 104, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Watermelon', portion: '1 cup diced (150g)', kcal: 46, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Mango', portion: '1 cup diced (165g)', kcal: 99, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Pineapple', portion: '1 cup diced (165g)', kcal: 82, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Strawberries', portion: '1 cup (150g)', kcal: 48, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Blueberries', portion: '1 cup (150g)', kcal: 85, cuisine: 'Fruits', icon: 'nutrition' },
+    { name: 'Pomegranate', portion: '1/2 fruit (100g)', kcal: 72, cuisine: 'Fruits', icon: 'nutrition' },
+    // Vegetables
+    { name: 'Broccoli (Steamed)', portion: '1 cup (150g)', kcal: 55, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Spinach (Sautéed)', portion: '1 cup (180g)', kcal: 40, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Carrot', portion: '1 medium (60g)', kcal: 25, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Sweet Potato (Baked)', portion: '1 medium (150g)', kcal: 130, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Cauliflower (Roasted)', portion: '1 cup (150g)', kcal: 65, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Bell Pepper', portion: '1 medium (120g)', kcal: 30, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Cucumber', portion: '1 cup sliced (120g)', kcal: 16, cuisine: 'Vegetables', icon: 'grass' },
+    { name: 'Cherry Tomatoes', portion: '1 cup (150g)', kcal: 27, cuisine: 'Vegetables', icon: 'grass' },
+    // Snacks
+    { name: 'Potato Chips', portion: '1 small bag (28g)', kcal: 150, cuisine: 'Snacks', icon: 'fastfood' },
+    { name: 'Popcorn (Air-popped)', portion: '3 cups (24g)', kcal: 90, cuisine: 'Snacks', icon: 'fastfood' },
+    { name: 'Pretzel Sticks', portion: '1 oz (28g)', kcal: 108, cuisine: 'Snacks', icon: 'bakery_dining' },
+    { name: 'Trail Mix', portion: '1/4 cup (40g)', kcal: 180, cuisine: 'Snacks', icon: 'nutrition' },
+    { name: 'Granola Bar', portion: '1 bar (35g)', kcal: 150, cuisine: 'Snacks', icon: 'fastfood' },
+    { name: 'Rice Cakes', portion: '2 cakes (18g)', kcal: 70, cuisine: 'Snacks', icon: 'fastfood' },
+    { name: 'Beef Jerky', portion: '1 oz (28g)', kcal: 116, cuisine: 'Snacks', icon: 'fastfood' },
+    { name: 'Tortilla Chips with Salsa', portion: '1 cup (60g)', kcal: 300, cuisine: 'Snacks', icon: 'tapas' },
+    // Coffee & Tea
+    { name: 'Black Coffee', portion: '1 cup (240ml)', kcal: 2, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Latte', portion: '1 cup (350ml)', kcal: 190, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Cappuccino', portion: '1 cup (240ml)', kcal: 120, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Espresso', portion: '1 shot (30ml)', kcal: 3, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Green Tea', portion: '1 cup (240ml)', kcal: 2, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Masala Chai', portion: '1 cup (200ml)', kcal: 120, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Matcha Latte', portion: '1 cup (300ml)', kcal: 180, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Iced Mocha', portion: '1 cup (350ml)', kcal: 290, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    // Juices
+    { name: 'Orange Juice', portion: '1 cup (240ml)', kcal: 110, cuisine: 'Juices', icon: 'local_bar' },
+    { name: 'Apple Juice', portion: '1 cup (240ml)', kcal: 114, cuisine: 'Juices', icon: 'local_bar' },
+    { name: 'Cranberry Juice', portion: '1 cup (240ml)', kcal: 116, cuisine: 'Juices', icon: 'local_bar' },
+    { name: 'Coconut Water', portion: '1 cup (240ml)', kcal: 45, cuisine: 'Juices', icon: 'local_bar' },
+    { name: 'Pomegranate Juice', portion: '1 cup (240ml)', kcal: 134, cuisine: 'Juices', icon: 'local_bar' },
+    { name: 'Tomato Juice', portion: '1 cup (240ml)', kcal: 41, cuisine: 'Juices', icon: 'local_bar' },
+    // Milk & Dairy
+    { name: 'Whole Milk', portion: '1 cup (240ml)', kcal: 150, cuisine: 'Milk & Dairy', icon: 'local_drink' },
+    { name: 'Skim Milk', portion: '1 cup (240ml)', kcal: 83, cuisine: 'Milk & Dairy', icon: 'local_drink' },
+    { name: 'Almond Milk', portion: '1 cup (240ml)', kcal: 39, cuisine: 'Milk & Dairy', icon: 'local_drink' },
+    { name: 'Oat Milk', portion: '1 cup (240ml)', kcal: 120, cuisine: 'Milk & Dairy', icon: 'local_drink' },
+    { name: 'Soy Milk', portion: '1 cup (240ml)', kcal: 105, cuisine: 'Milk & Dairy', icon: 'local_drink' },
+    { name: 'Cottage Cheese', portion: '1/2 cup (110g)', kcal: 90, cuisine: 'Milk & Dairy', icon: 'nutrition' },
+    { name: 'Cheddar Cheese', portion: '1 oz (28g)', kcal: 115, cuisine: 'Milk & Dairy', icon: 'nutrition' },
+    { name: 'Mozzarella Cheese', portion: '1 oz (28g)', kcal: 85, cuisine: 'Milk & Dairy', icon: 'nutrition' },
+    // South Indian
+    { name: 'Masala Dosa', portion: '1 dosa (150g)', kcal: 350, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Plain Dosa', portion: '1 dosa (100g)', kcal: 210, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Idli', portion: '2 pieces (100g)', kcal: 140, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Sambar', portion: '1 cup (200g)', kcal: 150, cuisine: 'South Indian', icon: 'soup_kitchen' },
+    { name: 'Coconut Chutney', portion: '2 tbsp (30g)', kcal: 70, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Medu Vada', portion: '2 pieces (100g)', kcal: 220, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Uttapam', portion: '1 piece (150g)', kcal: 280, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Ven Pongal', portion: '1 cup (200g)', kcal: 320, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Rasam', portion: '1 cup (200ml)', kcal: 90, cuisine: 'South Indian', icon: 'soup_kitchen' },
+    { name: 'Upma', portion: '1 cup (200g)', kcal: 250, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Bisi Bele Bath', portion: '1 cup (250g)', kcal: 380, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Curd Rice', portion: '1 cup (220g)', kcal: 240, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Lemon Rice', portion: '1 cup (200g)', kcal: 260, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Appam', portion: '2 pieces (120g)', kcal: 240, cuisine: 'South Indian', icon: 'tapas' },
+    { name: 'Puttu with Kadala Curry', portion: '1 serving (250g)', kcal: 380, cuisine: 'South Indian', icon: 'rice_bowl' },
+    { name: 'Chettinad Chicken Curry', portion: '1 cup (250g)', kcal: 420, cuisine: 'South Indian', icon: 'dinner_dining' },
+    { name: 'Payasam', portion: '1 cup (200g)', kcal: 260, cuisine: 'South Indian', icon: 'cake' },
+    { name: 'South Indian Filter Coffee', portion: '1 cup (150ml)', kcal: 110, cuisine: 'South Indian', icon: 'local_cafe' },
+    // Health & Malt Drinks
+    { name: 'Horlicks (Malted Milk)', portion: '1 cup (240ml)', kcal: 210, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Boost Malt Drink', portion: '1 cup (240ml)', kcal: 200, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Bournvita', portion: '1 cup (240ml)', kcal: 210, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Complan', portion: '1 cup (240ml)', kcal: 220, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Ovaltine', portion: '1 cup (240ml)', kcal: 200, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Badam Milk (Almond Sweet Milk)', portion: '1 cup (240ml)', kcal: 240, cuisine: 'Health Drinks', icon: 'local_drink' },
+    { name: 'Protein Milk Shake (Whey)', portion: '1 cup (300ml)', kcal: 220, cuisine: 'Health Drinks', icon: 'local_drink' },
+    // More Coffee & Tea
+    { name: 'Turmeric Latte (Golden Milk)', portion: '1 cup (240ml)', kcal: 150, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Black Tea', portion: '1 cup (240ml)', kcal: 2, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Ginger Tea', portion: '1 cup (200ml)', kcal: 45, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Lemon Tea', portion: '1 cup (200ml)', kcal: 40, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Oolong Tea', portion: '1 cup (240ml)', kcal: 2, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Rose Milk', portion: '1 cup (240ml)', kcal: 180, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Thandai', portion: '1 cup (240ml)', kcal: 220, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Cold Brew Coffee', portion: '1 cup (350ml)', kcal: 5, cuisine: 'Coffee & Tea', icon: 'local_cafe' },
+    { name: 'Caramel Macchiato', portion: '1 cup (350ml)', kcal: 250, cuisine: 'Coffee & Tea', icon: 'local_cafe' }
   ];
 
-  var CUISINES = ['All', 'Indian', 'Italian', 'Greek', 'Chinese', 'Japanese', 'Mexican', 'Thai', 'Middle Eastern', 'Korean', 'French', 'Western'];
-  var DRINK_CATEGORIES = ['Soft Drinks', 'Hard Drinks', 'Wine', 'Protein Shakes', 'Smoothies'];
+  var CUISINES = ['All', 'Indian', 'South Indian', 'Italian', 'Greek', 'Chinese', 'Japanese', 'Mexican', 'Thai', 'Middle Eastern', 'Korean', 'French', 'Western', 'Vietnamese', 'Indonesian', 'Filipino', 'Spanish', 'African', 'Caribbean', 'Brazilian', 'German', 'British', 'Russian'];
+  var DRINK_CATEGORIES = ['Soft Drinks', 'Hard Drinks', 'Wine', 'Protein Shakes', 'Smoothies', 'Coffee & Tea', 'Juices', 'Milk & Dairy', 'Health Drinks'];
+  var CATEGORIES = ['Ice Cream', 'Desserts', 'Fast Food', 'Breakfast', 'Fruits', 'Vegetables', 'Snacks'];
   var activeCuisine = 'All';
   var visibleCount = 8;
   var PAGE_SIZE = 8;
 
   var cuisineChipsContainer = document.getElementById('cuisine-chips');
   var drinkChipsContainer = document.getElementById('drink-chips');
+  var categoryChipsContainer = document.getElementById('category-chips');
   var resultsList = document.getElementById('search-results-list');
   var resultsCount = document.getElementById('results-count');
   var noResultsMsg = document.getElementById('no-results-msg');
@@ -892,6 +1850,7 @@
 
   buildChipRow(cuisineChipsContainer, CUISINES);
   buildChipRow(drinkChipsContainer, DRINK_CATEGORIES);
+  buildChipRow(categoryChipsContainer, CATEGORIES);
 
   function getFiltered() {
     var q = (searchInput.value || '').trim().toLowerCase();
@@ -902,7 +1861,7 @@
     });
   }
 
-  function foodRow(f) {
+  function foodRow(f, idx) {
     var row = document.createElement('div');
     row.className = 'group flex items-center justify-between p-md hover:bg-surface-container-low transition-colors cursor-pointer';
     row.innerHTML =
@@ -917,7 +1876,7 @@
       '</div>' +
       '<div class="flex items-center gap-lg">' +
         '<span class="font-data-display text-label-md text-primary">' + f.kcal + ' kcal</span>' +
-        '<button class="log-add-btn w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform shadow-md hover:opacity-90">' +
+        '<button class="log-add-btn w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform shadow-md hover:opacity-90" data-food-idx="' + idx + '" title="Log this">' +
           '<span class="material-symbols-outlined">add</span>' +
         '</button>' +
       '</div>';
@@ -927,8 +1886,8 @@
   function renderResults() {
     var filtered = getFiltered();
     resultsList.innerHTML = '';
-    filtered.slice(0, visibleCount).forEach(function (f) {
-      resultsList.appendChild(foodRow(f));
+    filtered.slice(0, visibleCount).forEach(function (f, i) {
+      resultsList.appendChild(foodRow(f, i));
     });
     resultsCount.textContent = filtered.length + (filtered.length === 1 ? ' match found' : ' matches found');
     noResultsMsg.classList.toggle('hidden', filtered.length !== 0);
@@ -941,9 +1900,89 @@
     renderResults();
   });
 
+  // ---------- Open Food Facts live search (fallback for anything not in the built-in list) ----------
+  var apiResultsSection = document.getElementById('api-results-section');
+  var apiResultsList = document.getElementById('api-results-list');
+  var apiResultsStatus = document.getElementById('api-results-status');
+  var apiDebounceTimer = null;
+  var apiRequestId = 0;
+
+  function kcalFromProduct(p) {
+    if (!p.nutriments) return null;
+    var per100 = p.nutriments['energy-kcal_100g'];
+    if (typeof per100 === 'number') return Math.round(per100);
+    var kj = p.nutriments['energy_100g'];
+    if (typeof kj === 'number') return Math.round(kj / 4.184);
+    return null;
+  }
+
+  function apiFoodRow(p) {
+    var row = document.createElement('div');
+    row.className = 'flex items-center justify-between p-md';
+    var kcal = kcalFromProduct(p);
+    var name = p.product_name || p.generic_name || 'Unnamed product';
+    var brand = p.brands ? p.brands.split(',')[0].trim() : '';
+    var img = p.image_front_thumb_url || p.image_small_url || '';
+    row.innerHTML =
+      '<div class="flex items-center gap-md min-w-0">' +
+        '<div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden flex items-center justify-center flex-shrink-0">' +
+          (img ? '<img class="w-full h-full object-cover" src="' + img + '" alt="">' : '<span class="material-symbols-outlined text-outline">public</span>') +
+        '</div>' +
+        '<div class="min-w-0">' +
+          '<p class="font-headline-md text-body-lg text-on-surface truncate">' + name + '</p>' +
+          '<p class="font-label-sm text-label-sm text-on-surface-variant truncate">' + (brand ? brand + ' &middot; ' : '') + (p.quantity || 'per 100g') + '</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-lg flex-shrink-0">' +
+        '<span class="font-data-display text-label-md text-primary">' + (kcal !== null ? kcal + ' kcal' : '—') + '</span>' +
+      '</div>';
+    return row;
+  }
+
+  function fetchOpenFoodFacts(query) {
+    var thisRequest = ++apiRequestId;
+    apiResultsSection.classList.remove('hidden');
+    apiResultsList.innerHTML = '';
+    apiResultsStatus.textContent = 'Searching\u2026';
+    var url = 'https://world.openfoodfacts.org/cgi/search.pl?search_terms=' + encodeURIComponent(query) +
+      '&search_simple=1&action=process&json=1&page_size=10&sort_by=unique_scans_n' +
+      '&fields=product_name,generic_name,brands,quantity,nutriments,image_front_thumb_url,image_small_url';
+    fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      if (thisRequest !== apiRequestId) return; // a newer search superseded this one
+      var products = (data && data.products) || [];
+      apiResultsList.innerHTML = '';
+      if (!products.length) {
+        apiResultsStatus.textContent = 'No live matches';
+        apiResultsSection.classList.add('hidden');
+        return;
+      }
+      products.slice(0, 10).forEach(function (p) {
+        apiResultsList.appendChild(apiFoodRow(p));
+      });
+      apiResultsStatus.textContent = products.length + ' found online';
+    }).catch(function () {
+      if (thisRequest !== apiRequestId) return;
+      apiResultsStatus.textContent = 'Offline \u2014 showing built-in results only';
+      apiResultsList.innerHTML = '';
+    });
+  }
+
+  function maybeQueryApi() {
+    var q = (searchInput.value || '').trim();
+    clearTimeout(apiDebounceTimer);
+    if (q.length < 2) {
+      apiRequestId++; // invalidate any in-flight request
+      apiResultsSection.classList.add('hidden');
+      apiResultsList.innerHTML = '';
+      return;
+    }
+    apiDebounceTimer = setTimeout(function () { fetchOpenFoodFacts(q); }, 500);
+  }
+
   searchInput.addEventListener('input', function () {
     visibleCount = PAGE_SIZE;
     renderResults();
+    maybeQueryApi();
   });
 
   document.querySelectorAll('.quick-search-chip').forEach(function (chip) {
@@ -951,6 +1990,7 @@
       searchInput.value = chip.dataset.query || '';
       selectCategory('All');
       searchInput.focus();
+      maybeQueryApi();
     });
   });
 
@@ -959,6 +1999,9 @@
     var btn = e.target.closest('.log-add-btn');
     if (!btn) return;
     e.stopPropagation();
+    var idx = parseInt(btn.dataset.foodIdx, 10);
+    var food = getFiltered()[idx];
+    if (food) addLogEntry(food);
     var icon = btn.querySelector('.material-symbols-outlined');
     icon.textContent = 'check';
     btn.classList.replace('bg-primary', 'bg-tertiary');
@@ -970,12 +2013,14 @@
 
   renderResults();
 
-  // Water log micro-interaction (Dashboard)
+  // Water log (Dashboard) — each tap logs one real glass (250ml) to today's log
   var waterBtn = document.querySelector('[data-water-log]');
   if (waterBtn) {
     waterBtn.addEventListener('click', function () {
-      waterBtn.textContent = 'Logged!';
-      setTimeout(function () { waterBtn.textContent = 'Log Water'; }, 1800);
+      logWaterGlass();
+      var original = waterBtn.textContent;
+      waterBtn.textContent = 'Logged +' + GLASS_ML + 'ml!';
+      setTimeout(function () { waterBtn.textContent = original; }, 1800);
     });
   }
 
@@ -1011,20 +2056,6 @@
       });
     });
   }
-
-  // Calorie ring animation (Dashboard)
-  function animateDashboard() {
-    var ring = document.querySelector('[data-ring]');
-    if (ring) {
-      ring.style.strokeDashoffset = '552.92';
-      requestAnimationFrame(function () {
-        setTimeout(function () { ring.style.strokeDashoffset = '221.16'; }, 50);
-      });
-    }
-  }
-
-  animateDashboard();
-  animateInsightBars();
 })();
 </script>
 </body>
