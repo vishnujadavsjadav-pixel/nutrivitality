@@ -690,7 +690,7 @@
           <button class="text-primary font-label-md text-label-md hover:underline" id="edit-goals-btn">Edit All</button>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
         <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
           <div class="flex justify-between items-start mb-4">
             <div class="bg-primary-container/20 p-2 rounded-lg">
@@ -719,24 +719,6 @@
             <span class="font-label-md text-label-md text-on-surface-variant">kg</span>
           </div>
           <input class="field-input hidden mt-1" id="goal-weight-input" min="20" step="0.1" type="number"/>
-        </div>
-        <div class="hover-card bg-white p-lg rounded-lg shadow-[0px_4px_20px_rgba(31,41,55,0.05)] border border-outline-variant hover:border-primary transition-colors group">
-          <div class="flex justify-between items-start mb-4">
-            <div class="bg-secondary-container/20 p-2 rounded-lg">
-              <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">directions_run</span>
-            </div>
-          </div>
-          <p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-1">Activity Level</p>
-          <div class="flex items-baseline gap-2" id="goal-activity-display">
-            <span class="font-headline-md text-headline-md text-on-surface" id="goal-activity-value">Moderately Active</span>
-          </div>
-          <select class="field-input hidden mt-1" id="goal-activity-input">
-            <option value="Sedentary">Sedentary</option>
-            <option value="Lightly Active">Lightly Active</option>
-            <option value="Moderately Active">Moderately Active</option>
-            <option value="Very Active">Very Active</option>
-            <option value="Extremely Active">Extremely Active</option>
-          </select>
         </div>
       </div>
       <div class="hidden justify-end" id="goals-save-row">
@@ -1058,8 +1040,6 @@
   var goalKcalInput = document.getElementById('goal-kcal-input');
   var goalWeightValue = document.getElementById('goal-weight-value');
   var goalWeightInput = document.getElementById('goal-weight-input');
-  var goalActivityValue = document.getElementById('goal-activity-value');
-  var goalActivityInput = document.getElementById('goal-activity-input');
   var goalsSaveRow = document.getElementById('goals-save-row');
   var unitsDesc = document.getElementById('units-desc');
 
@@ -1085,8 +1065,6 @@
     goalKcalInput.value = p.dailyTarget || 2000;
     goalWeightValue.textContent = p.targetWeight || 65;
     goalWeightInput.value = p.targetWeight || 65;
-    goalActivityValue.textContent = p.activityLevel || 'Moderately Active';
-    goalActivityInput.value = p.activityLevel || 'Moderately Active';
     unitsDesc.textContent = p.unit === 'imperial' ? 'Imperial (lb, ft, kcal)' : 'Metric (kg, cm, kcal)';
   }
 
@@ -1272,23 +1250,20 @@
   });
 
   document.getElementById('edit-goals-btn').addEventListener('click', function () {
-    [goalKcalValue, goalWeightValue, goalActivityValue].forEach(function (el) { el.parentElement.classList.add('hidden'); });
+    [goalKcalValue, goalWeightValue].forEach(function (el) { el.parentElement.classList.add('hidden'); });
     goalKcalInput.classList.remove('hidden');
     goalWeightInput.classList.remove('hidden');
-    goalActivityInput.classList.remove('hidden');
     goalsSaveRow.classList.remove('hidden');
     goalsSaveRow.classList.add('flex');
   });
   document.getElementById('save-goals-btn').addEventListener('click', function () {
     saveProfilePatch({
       dailyTarget: parseInt(goalKcalInput.value, 10) || (currentProfile && currentProfile.dailyTarget) || 2000,
-      targetWeight: parseFloat(goalWeightInput.value) || (currentProfile && currentProfile.targetWeight) || 65,
-      activityLevel: goalActivityInput.value
+      targetWeight: parseFloat(goalWeightInput.value) || (currentProfile && currentProfile.targetWeight) || 65
     }).then(applyProfileToUI);
-    [goalKcalValue, goalWeightValue, goalActivityValue].forEach(function (el) { el.parentElement.classList.remove('hidden'); });
+    [goalKcalValue, goalWeightValue].forEach(function (el) { el.parentElement.classList.remove('hidden'); });
     goalKcalInput.classList.add('hidden');
     goalWeightInput.classList.add('hidden');
-    goalActivityInput.classList.add('hidden');
     goalsSaveRow.classList.add('hidden');
     goalsSaveRow.classList.remove('flex');
   });
