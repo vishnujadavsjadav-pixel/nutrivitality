@@ -303,6 +303,19 @@
         Log Water (+250ml)
       </button>
     </section>
+
+    <section class="bg-surface-container-lowest rounded-lg border border-outline-variant p-lg flex flex-col md:flex-row items-center gap-md shadow-[0px_4px_20px_rgba(31,41,55,0.05)]">
+      <div class="bg-tertiary-container/20 text-tertiary w-12 h-12 rounded-full flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined">calculate</span>
+      </div>
+      <div class="text-center md:text-left">
+        <h4 class="font-headline-md text-headline-md text-on-surface">Calorie Calculator</h4>
+        <p class="font-body-md text-body-md text-on-surface-variant">Find out how many calories you need each day from your height, weight and daily activity.</p>
+      </div>
+      <button class="md:ml-auto border border-primary text-primary px-lg py-md rounded-lg font-label-md text-label-md hover:bg-primary/5 active:scale-95 transition-all whitespace-nowrap" data-open-calc>
+        Calculate Now
+      </button>
+    </section>
   </div>
 
   <button class="fixed bottom-24 right-container-margin w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center z-40 hover:opacity-90 active:scale-90 transition-all" data-nav="search">
@@ -671,7 +684,7 @@
       <div class="flex justify-between items-end">
         <h3 class="font-headline-md text-headline-md">My Health Goals</h3>
         <div class="flex items-center gap-lg">
-          <button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1" id="calc-calories-btn">
+          <button class="text-primary font-label-md text-label-md hover:underline flex items-center gap-1" id="calc-calories-btn" data-open-calc>
             <span class="material-symbols-outlined text-base">calculate</span>Calculate My Calories
           </button>
           <button class="text-primary font-label-md text-label-md hover:underline" id="edit-goals-btn">Edit All</button>
@@ -1312,87 +1325,130 @@
     'Extremely Active': 1.9
   };
 
+  var ACTIVITY_NOTES = {
+    'Sedentary': 'Little or no exercise, desk job',
+    'Lightly Active': 'Light exercise 1–3 days/week',
+    'Moderately Active': 'Moderate exercise 3–5 days/week',
+    'Very Active': 'Hard exercise 6–7 days/week',
+    'Extremely Active': 'Physical job or training twice a day'
+  };
+
+  function calcField(label, inner) {
+    return '<div><label class="font-label-md text-label-md text-on-surface-variant block mb-1">' + label + '</label>' + inner + '</div>';
+  }
+
   function calcCaloriesModalBody() {
     var p = currentProfile || {};
+    var m = p.measurements || {};
+    var imperial = p.unit === 'imperial';
+    var heightInputs, weightInput;
+    if (imperial) {
+      var totalIn = m.heightCm ? m.heightCm / 2.54 : 0;
+      var ft = totalIn ? Math.floor(totalIn / 12) : '';
+      var inch = totalIn ? Math.round(totalIn - ft * 12) : '';
+      if (inch === 12) { ft += 1; inch = 0; }
+      heightInputs = '<div class="grid grid-cols-2 gap-xs">' +
+        '<input class="field-input" id="calc-height-ft" min="3" max="8" placeholder="ft" type="number" value="' + ft + '"/>' +
+        '<input class="field-input" id="calc-height-in" min="0" max="11" placeholder="in" type="number" value="' + inch + '"/>' +
+      '</div>';
+      var lb = m.weightKg ? Math.round(m.weightKg / 0.45359237 * 10) / 10 : '';
+      weightInput = '<input class="field-input" id="calc-weight" min="66" max="660" step="0.1" placeholder="e.g. 145" value="' + lb + '" type="number"/>';
+    } else {
+      heightInputs = '<input class="field-input" id="calc-height" min="100" max="250" placeholder="e.g. 172" type="number" value="' + (m.heightCm || '') + '"/>';
+      weightInput = '<input class="field-input" id="calc-weight" min="30" max="300" step="0.1" placeholder="e.g. 65" value="' + (m.weightKg || '') + '" type="number"/>';
+    }
+    var activity = p.activityLevel || 'Moderately Active';
     return '' +
       '<form id="calc-form" class="space-y-md">' +
         '<div class="grid grid-cols-2 gap-md">' +
-          '<div>' +
-            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Sex</label>' +
-            '<select class="field-input" id="calc-sex"><option value="male">Male</option><option value="female">Female</option></select>' +
-          '</div>' +
-          '<div>' +
-            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Age</label>' +
-            '<input class="field-input" id="calc-age" min="10" max="100" placeholder="e.g. 22" type="number"/>' +
-          '</div>' +
-          '<div>' +
-            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Height (cm)</label>' +
-            '<input class="field-input" id="calc-height" min="100" max="250" placeholder="e.g. 172" type="number"/>' +
-          '</div>' +
-          '<div>' +
-            '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Weight (kg)</label>' +
-            '<input class="field-input" id="calc-weight" min="30" max="300" step="0.1" placeholder="e.g. 65" value="' + (p.targetWeight || '') + '" type="number"/>' +
-          '</div>' +
+          calcField('Sex', '<select class="field-input" id="calc-sex">' +
+            '<option value="male"' + (m.sex === 'male' ? ' selected' : '') + '>Male</option>' +
+            '<option value="female"' + (m.sex === 'female' ? ' selected' : '') + '>Female</option></select>') +
+          calcField('Age', '<input class="field-input" id="calc-age" min="15" max="100" placeholder="e.g. 22" type="number" value="' + (m.age || '') + '"/>') +
+          calcField(imperial ? 'Height (ft / in)' : 'Height (cm)', heightInputs) +
+          calcField(imperial ? 'Current weight (lb)' : 'Current weight (kg)', weightInput) +
         '</div>' +
-        '<div>' +
-          '<label class="font-label-md text-label-md text-on-surface-variant block mb-1">Activity Level</label>' +
-          '<select class="field-input" id="calc-activity">' +
-            Object.keys(ACTIVITY_MULTIPLIERS).map(function (lvl) {
-              return '<option value="' + lvl + '"' + (lvl === p.activityLevel ? ' selected' : '') + '>' + lvl + '</option>';
-            }).join('') +
-          '</select>' +
-        '</div>' +
+        calcField('Daily Activity', '<select class="field-input" id="calc-activity">' +
+          Object.keys(ACTIVITY_MULTIPLIERS).map(function (lvl) {
+            return '<option value="' + lvl + '"' + (lvl === activity ? ' selected' : '') + '>' + lvl + ' — ' + ACTIVITY_NOTES[lvl] + '</option>';
+          }).join('') +
+        '</select>') +
         '<button class="w-full py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all" type="submit">Calculate</button>' +
       '</form>' +
       '<div id="calc-results" class="hidden mt-lg space-y-sm"></div>';
   }
 
-  function calcResultCard(label, kcal, note, showSetBtn) {
-    return '<div class="flex items-center justify-between p-md rounded-lg border border-outline-variant">' +
+  function calcResultCard(label, kcal, note) {
+    return '<div class="flex items-center justify-between gap-sm p-md rounded-lg border border-outline-variant">' +
       '<div>' +
         '<p class="font-body-md text-body-md text-on-surface">' + label + '</p>' +
         '<p class="font-label-sm text-label-sm text-on-surface-variant">' + note + '</p>' +
       '</div>' +
-      '<div class="text-right flex items-center gap-sm">' +
+      '<div class="text-right flex items-center gap-sm shrink-0">' +
         '<span class="font-headline-md text-headline-md text-primary">' + kcal.toLocaleString() + '</span>' +
-        (showSetBtn ? '<button class="calc-set-target-btn text-label-sm font-label-sm bg-primary text-on-primary px-sm py-xs rounded-lg hover:opacity-90" data-kcal="' + kcal + '">Use this</button>' : '') +
+        '<button class="calc-set-target-btn text-label-sm font-label-sm bg-primary text-on-primary px-sm py-xs rounded-lg hover:opacity-90" data-kcal="' + kcal + '">Use this</button>' +
       '</div>' +
     '</div>';
   }
 
-  document.getElementById('calc-calories-btn').addEventListener('click', function () {
-    openModal('Calculate My Calories', calcCaloriesModalBody());
+  function openCalorieCalculator() {
+    openModal('Calorie Calculator', calcCaloriesModalBody());
 
     document.getElementById('calc-form').addEventListener('submit', function (e) {
       e.preventDefault();
+      var imperial = currentProfile && currentProfile.unit === 'imperial';
       var sex = document.getElementById('calc-sex').value;
       var age = parseFloat(document.getElementById('calc-age').value);
-      var height = parseFloat(document.getElementById('calc-height').value);
       var weight = parseFloat(document.getElementById('calc-weight').value);
+      var height;
+      if (imperial) {
+        var ft = parseFloat(document.getElementById('calc-height-ft').value) || 0;
+        var inch = parseFloat(document.getElementById('calc-height-in').value) || 0;
+        height = (ft * 12 + inch) * 2.54;
+        weight = weight * 0.45359237;
+      } else {
+        height = parseFloat(document.getElementById('calc-height').value);
+      }
       var activity = document.getElementById('calc-activity').value;
       var resultsEl = document.getElementById('calc-results');
 
-      if (!age || !height || !weight) {
+      if (!age || !height || !weight || age < 15 || age > 100 || height < 100 || height > 250 || weight < 30 || weight > 300) {
         resultsEl.classList.remove('hidden');
-        resultsEl.innerHTML = '<p class="font-label-md text-label-md text-error">Please fill in age, height, and weight.</p>';
+        resultsEl.innerHTML = '<p class="font-label-md text-label-md text-error">Please enter a valid age (15–100), height and weight.</p>';
         return;
       }
 
+      // Remember measurements so the calculator is pre-filled next time
+      saveProfilePatch({
+        measurements: { sex: sex, age: age, heightCm: Math.round(height), weightKg: Math.round(weight * 10) / 10 },
+        activityLevel: activity
+      }).then(applyProfileToUI);
+
       // Mifflin-St Jeor equation
-      var bmr = sex === 'male'
+      var bmr = Math.round(sex === 'male'
         ? (10 * weight + 6.25 * height - 5 * age + 5)
-        : (10 * weight + 6.25 * height - 5 * age - 161);
+        : (10 * weight + 6.25 * height - 5 * age - 161));
       var tdee = Math.round(bmr * ACTIVITY_MULTIPLIERS[activity]);
-      var mildLoss = Math.round(tdee - 250);
-      var loss = Math.round(tdee - 500);
+      var floor = sex === 'male' ? 1500 : 1200;
+      var safe = function (k) { return Math.max(floor, Math.round(k)); };
+      var bmi = weight / Math.pow(height / 100, 2);
 
       resultsEl.classList.remove('hidden');
       resultsEl.innerHTML =
-        '<p class="font-label-sm text-label-sm text-on-surface-variant mb-sm">Based on the Mifflin-St Jeor formula. These are estimates \u2014 individual needs vary.</p>' +
-        calcResultCard('Maintain current weight', tdee, 'Matches your estimated daily burn', true) +
-        calcResultCard('Mild weight loss', mildLoss, '\u2248 0.25 kg (0.5 lb) per week', true) +
-        calcResultCard('Weight loss', loss, '\u2248 0.5 kg (1 lb) per week', true) +
-        '<p class="font-label-sm text-label-sm text-on-surface-variant pt-sm">Never go below 1,200 kcal/day (women) or 1,500 kcal/day (men) without medical supervision.</p>';
+        '<div class="grid grid-cols-3 gap-sm mb-sm">' +
+          [['BMR', bmr.toLocaleString(), 'kcal at rest'], ['Daily burn', tdee.toLocaleString(), 'kcal with activity'], ['BMI', bmi.toFixed(1), '']].map(function (t) {
+            return '<div class="p-sm rounded-lg bg-primary/5 text-center">' +
+              '<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">' + t[0] + '</p>' +
+              '<p class="font-headline-md text-headline-md text-on-surface">' + t[1] + '</p>' +
+              '<p class="font-label-sm text-label-sm text-on-surface-variant">' + t[2] + '</p>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        calcResultCard('Weight loss', safe(tdee - 500), '≈ 0.5 kg (1 lb) per week') +
+        calcResultCard('Mild weight loss', safe(tdee - 250), '≈ 0.25 kg (0.5 lb) per week') +
+        calcResultCard('Maintain weight', tdee, 'Matches your estimated daily burn') +
+        calcResultCard('Weight gain', Math.round(tdee + 300), '≈ 0.25–0.3 kg (0.5 lb) per week') +
+        '<p class="font-label-sm text-label-sm text-on-surface-variant pt-sm">Based on the Mifflin-St Jeor formula. These are estimates — individual needs vary. Targets never go below ' + floor.toLocaleString() + ' kcal/day; consult a professional for medical advice.</p>';
 
       resultsEl.querySelectorAll('.calc-set-target-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -1405,6 +1461,10 @@
         });
       });
     });
+  }
+
+  document.querySelectorAll('[data-open-calc]').forEach(function (btn) {
+    btn.addEventListener('click', openCalorieCalculator);
   });
 
   document.getElementById('data-integration-row').addEventListener('click', function () {
