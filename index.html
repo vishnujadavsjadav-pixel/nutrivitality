@@ -121,12 +121,13 @@
     .auth-tab.is-active { background: #4ade80; color: #005e2d; }
     .auth-tab:not(.is-active) { color: #55615a; }
     .edit-toggle-hidden { display: none !important; }
+    body.auth-loading { visibility: hidden; }
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="bg-background text-on-surface font-body-md selection:bg-primary-container">
+<body class="auth-loading bg-background text-on-surface font-body-md selection:bg-primary-container">
 
 <!-- ============ PAGE: AUTH (Login / Sign up) ============ -->
 <section class="page-section" data-page="auth">
@@ -819,6 +820,7 @@
 
 <script>
 (function () {
+  setTimeout(function () { document.body.classList.remove('auth-loading'); }, 4000);
   var sections = document.querySelectorAll('.page-section');
   var navLinks = document.querySelectorAll('[data-nav]');
 
@@ -836,10 +838,9 @@
     if (page === 'insights') animateInsightBars();
   }
 
-  navLinks.forEach(function (el) {
-    el.addEventListener('click', function () {
-      goTo(el.dataset.nav);
-    });
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-nav]');
+    if (el) goTo(el.dataset.nav);
   });
 
   // ================= AUTH + PROFILE (Firebase Auth + Firestore) =================
@@ -872,6 +873,7 @@
 
   // In-memory cache of the signed-in user's profile (kept in sync with Firestore)
   var currentProfile = null;
+  var pendingSignupName = null;
 
   function friendlyAuthError(err) {
     var code = err && err.code;
@@ -881,6 +883,10 @@
     if (code === 'auth/user-not-found' || code === 'auth/wrong-password' || code === 'auth/invalid-credential') return 'Incorrect email or password.';
     if (code === 'auth/too-many-requests') return 'Too many attempts. Please wait a moment and try again.';
     if (code === 'auth/network-request-failed') return 'Network error \u2014 check your connection and try again.';
+    if (code === 'auth/operation-not-allowed') return 'Email/password sign-in is not enabled in Firebase yet.';
+    if (code === 'auth/unauthorized-domain') return 'This website address is not authorized in Firebase (Authentication > Settings > Authorized domains).';
+    if (code === 'auth/invalid-api-key') return 'The Firebase API key in the app is invalid.';
+    if (code === 'auth/user-disabled') return 'This account has been disabled.';
     return (err && err.message) || 'Something went wrong. Please try again.';
   }
 
@@ -958,6 +964,7 @@
 
   function enterApp() {
     document.body.classList.remove('auth-mode');
+    document.body.classList.remove('auth-loading');
     applyProfileToUI();
     renderDashboard();
     goTo('dashboard');
@@ -981,10 +988,11 @@
     var email = document.getElementById('signup-email').value.trim().toLowerCase();
     var password = document.getElementById('signup-password').value;
     setFormsBusy(true);
+    pendingSignupName = name;
     auth.createUserWithEmailAndPassword(email, password)
       .then(function (cred) {
         return cred.user.updateProfile({ displayName: name }).then(function () {
-          return db.collection('profiles').doc(cred.user.uid).set(defaultProfile(name));
+          return db.collection('profiles').doc(cred.user.uid).set(defaultProfile(name), { merge: true });
         });
       })
       .catch(function (err) { showAuthError(friendlyAuthError(err)); })
@@ -1055,7 +1063,7 @@
     var user = auth.currentUser;
     if (!user || !currentProfile) return;
     var p = currentProfile;
-    var avatarSrc = p.avatar || profileAvatar.src;
+    var avatarSrc = p.avatar || DEFAULT_AVATAR;
     headerAvatar.src = avatarSrc;
     profileAvatar.src = avatarSrc;
     profileNameDisplay.textContent = p.name || user.displayName || 'Member';
@@ -1213,17 +1221,110 @@
     reader.readAsDataURL(file);
   }
 
-  document.getElementById('avatar-edit-btn').addEventListener('click', function () {
-    avatarFileInput.click();
-  });
+  // ---------- Profile photo: camera, gallery or remove ----------
+  var DEFAULT_AVATAR = profileAvatar.src;
+  var cameraStream = null;
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function (t) { t.stop(); });
+      cameraStream = null;
+    }
+  }
+
+  function setAvatar(dataUrl) {
+    headerAvatar.src = dataUrl || DEFAULT_AVATAR;
+    profileAvatar.src = dataUrl || DEFAULT_AVATAR;
+    saveProfilePatch({ avatar: dataUrl });
+  }
+
+  function photoOptionBtn(id, icon, label, extra) {
+    return '<button type="button" id="' + id + '" class="w-full flex items-center gap-md p-md rounded-lg border border-outline-variant hover:bg-surface transition-colors text-left ' + (extra || '') + '">' +
+      '<span class="material-symbols-outlined">' + icon + '</span>' +
+      '<span class="font-body-md text-body-md">' + label + '</span></button>';
+  }
+
+  function openPhotoOptions() {
+    openModal('Profile Photo',
+      '<div class="space-y-sm">' +
+        photoOptionBtn('photo-camera-btn', 'photo_camera', 'Take a photo', 'text-primary') +
+        photoOptionBtn('photo-gallery-btn', 'photo_library', 'Choose from gallery', 'text-primary') +
+        photoOptionBtn('photo-remove-btn', 'delete', 'Remove photo', 'text-error') +
+      '</div>');
+    document.getElementById('photo-camera-btn').addEventListener('click', openCameraView);
+    document.getElementById('photo-gallery-btn').addEventListener('click', function () { avatarFileInput.click(); });
+    document.getElementById('photo-remove-btn').addEventListener('click', function () {
+      setAvatar('');
+      closeModal();
+    });
+  }
+
+  function openCameraView() {
+    openModal('Take a Photo',
+      '<div class="space-y-md">' +
+        '<div class="relative w-full aspect-square rounded-xl overflow-hidden bg-black">' +
+          '<video id="camera-video" class="w-full h-full object-cover" style="transform:scaleX(-1)" autoplay playsinline muted></video>' +
+        '</div>' +
+        '<p id="camera-status" class="font-label-sm text-label-sm text-on-surface-variant text-center">Starting camera\u2026</p>' +
+        '<div class="flex gap-sm">' +
+          '<button type="button" id="camera-capture-btn" class="flex-1 py-sm rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-50" disabled>Capture</button>' +
+          '<button type="button" id="camera-cancel-btn" class="flex-1 py-sm rounded-lg border border-outline-variant text-on-surface-variant font-label-md text-label-md hover:bg-surface-container transition-colors">Cancel</button>' +
+        '</div>' +
+      '</div>');
+
+    var video = document.getElementById('camera-video');
+    var status = document.getElementById('camera-status');
+    var capBtn = document.getElementById('camera-capture-btn');
+
+    document.getElementById('camera-cancel-btn').addEventListener('click', function () {
+      stopCamera();
+      openPhotoOptions();
+    });
+
+    capBtn.addEventListener('click', function () {
+      var w = video.videoWidth, h = video.videoHeight;
+      if (!w || !h) return;
+      var side = Math.min(w, h);
+      var size = Math.min(300, side);
+      var canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      ctx.translate(size, 0); ctx.scale(-1, 1); // match the mirrored preview
+      ctx.drawImage(video, (w - side) / 2, (h - side) / 2, side, side, 0, 0, size, size);
+      setAvatar(canvas.toDataURL('image/jpeg', 0.8));
+      closeModal();
+    });
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      status.textContent = 'Camera is not supported here. Use "Choose from gallery" instead.';
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+      .then(function (stream) {
+        // the modal may have been closed while the permission prompt was open
+        if (!document.body.contains(video)) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+        cameraStream = stream;
+        video.srcObject = stream;
+        capBtn.disabled = false;
+        status.textContent = 'Center your face and tap Capture.';
+      })
+      .catch(function (err) {
+        status.textContent = (err && err.name === 'NotAllowedError')
+          ? 'Camera permission was denied. Allow camera access in your browser settings, or choose from gallery.'
+          : 'Could not start the camera on this device.';
+      });
+  }
+
+  document.getElementById('avatar-edit-btn').addEventListener('click', openPhotoOptions);
+
   avatarFileInput.addEventListener('change', function () {
     var file = avatarFileInput.files && avatarFileInput.files[0];
     if (!file) return;
     resizeImageToDataUrl(file, 300, function (dataUrl) {
-      headerAvatar.src = dataUrl;
-      profileAvatar.src = dataUrl;
-      saveProfilePatch({ avatar: dataUrl });
+      setAvatar(dataUrl);
+      closeModal();
     });
+    avatarFileInput.value = ''; // lets you pick the same file again later
   });
 
   document.getElementById('edit-profile-btn').addEventListener('click', function () {
@@ -1285,6 +1386,7 @@
     modalOverlay.classList.add('flex');
   }
   function closeModal() {
+    stopCamera();
     modalOverlay.classList.add('hidden');
     modalOverlay.classList.remove('flex');
   }
@@ -1522,16 +1624,20 @@
   auth.onAuthStateChanged(function (user) {
     if (user) {
       db.collection('profiles').doc(user.uid).get().then(function (doc) {
-        currentProfile = doc.exists ? doc.data() : defaultProfile(user.displayName);
+        currentProfile = doc.exists ? doc.data() : defaultProfile(user.displayName || pendingSignupName);
+        pendingSignupName = null;
         if (!doc.exists) db.collection('profiles').doc(user.uid).set(currentProfile);
         enterApp();
-      }).catch(function () {
+      }).catch(function (err) {
+        console.error('Could not load profile:', err);
+        alert('Could not load your profile (' + ((err && err.code) || (err && err.message) || 'unknown error') + '). Your changes may not be saved. Check your Firestore rules.');
         currentProfile = defaultProfile(user.displayName);
         enterApp();
       });
     } else {
       currentProfile = null;
       showAuthScreen();
+      document.body.classList.remove('auth-loading');
     }
   });
 
